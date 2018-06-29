@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingLeft="10dp"
+    android:paddingTop="5dp"
+    android:paddingRight="10dp"
+    android:paddingBottom="5dp"
+    android:drawablePadding="10dp"
+    android:drawableLeft="@mipmap/ic_launcher_round"
+    android:drawableStart="@mipmap/ic_launcher_round"
+    android:textAlignment="viewStart"
+    android:gravity="center_vertical|start" />

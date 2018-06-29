@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.liuzhenlin.sliding_drawer.SlidingDrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/sliding_drawer_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/picture"
+        android:scaleType="centerCrop"
+        tools:ignore="ContentDescription"
+        app:layout_gravity="start" />
+    <!-- layout_gravity must be explicitly set, which will determine the drawer's placement -->
+
+    <!-- below is your content view -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?android:attr/actionBarSize"
+            app:contentInsetStartWithNavigation="0dp"
+            android:background="@color/colorPrimary"
+            app:title="@string/app_name"
+            app:titleTextAppearance="@style/ActionBarTitleAppearance" />
+
+        <ListView
+            android:id="@+id/listview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@id/toolbar"
+            android:scrollbars="vertical" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="4dp"
+            android:layout_below="@id/toolbar"
+            android:background="@drawable/shadow_actionbar" />
+    </RelativeLayout>
+</com.liuzhenlin.sliding_drawer.SlidingDrawerLayout>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="SlidingDrawerLayout">
+        <attr name="startDrawerWidthPercent" format="float" />
+        <attr name="endDrawerWidthPercent" format="float" />
+        <attr name="sensibleContentEdgeSize" format="dimension" />
+        <attr name="contentFadeColor" format="color" />
+    </declare-styleable>
+
+    <declare-styleable name="SlidingDrawerLayout_Layout">
+        <attr name="layout_gravity" format="integer">
+            <flag name="left" value="3" />
+            <flag name="right" value="5" />
+            <flag name="top" value="48" />
+            <flag name="bottom" value="80" />
+            <flag name="center_horizontal" value="1" />
+            <flag name="center_vertical" value="16" />
+            <flag name="center" value="17" />
+            <flag name="start" value="8388611" />
+            <flag name="end" value="8388613" />
+        </attr>
+    </declare-styleable>
+</resources>

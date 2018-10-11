@@ -12,7 +12,7 @@
         android:layout_height="match_parent"
         android:src="@drawable/picture"
         android:scaleType="centerCrop"
-        tools:ignore="ContentDescription"
+        android:contentDescription="@string/drawerBackground"
         app:layout_gravity="start" />
     <!-- layout_gravity must be explicitly set, which will determine the drawer's placement -->
 

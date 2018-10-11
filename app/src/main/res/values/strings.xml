@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">SlidingDrawerLayout</string>
     <string name="github">GitHub</string>
+    <string name="drawerBackground">Drawer Background</string>
 </resources>

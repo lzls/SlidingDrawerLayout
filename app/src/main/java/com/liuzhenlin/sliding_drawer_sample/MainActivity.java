@@ -8,7 +8,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.ColorInt;
-import android.support.v4.content.res.ResourcesCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -26,7 +26,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.liuzhenlin.sliding_drawer.SlidingDrawerLayout;
-import com.liuzhenlin.sliding_drawer_sample.utils.SystemBarUtil;
+import com.liuzhenlin.sliding_drawer_sample.utils.OSHelper;
+import com.liuzhenlin.sliding_drawer_sample.utils.SystemBarUtils;
 
 import java.lang.reflect.Field;
 
@@ -49,7 +50,7 @@ public class MainActivity extends AppCompatActivity implements SlidingDrawerLayo
 
         DisplayMetrics metrics = getResources().getDisplayMetrics();
         final int screenWidth = metrics.widthPixels;
-        Drawable icon = ResourcesCompat.getDrawable(getResources(), R.mipmap.ic_launcher_round, getTheme());
+        Drawable icon = ContextCompat.getDrawable(this, R.mipmap.ic_launcher_round);
         assert icon != null;
         final float width_dif = (float) icon.getIntrinsicWidth() + 20f * metrics.density;
         mSlidingDrawerLayout = findViewById(R.id.sliding_drawer_layout);
@@ -58,7 +59,7 @@ public class MainActivity extends AppCompatActivity implements SlidingDrawerLayo
         mSlidingDrawerLayout.addOnDrawerScrollListener(this);
         // During this activity starting, its content view will be measured at least twice, and
         // the width of SlidingDrawerLayout will not be correct till the second measurement is done.
-        // For that reason, we need to post twice to execute our action -- to open its drawer
+        // For that reason, we need to post twice to execute our action — to open its drawer
         // immediately after the second measurement.
         mSlidingDrawerLayout.post(new Runnable() {
             @Override
@@ -102,18 +103,17 @@ public class MainActivity extends AppCompatActivity implements SlidingDrawerLayo
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                SystemBarUtil.setTranslucentStatus(getWindow(), false);
-                SystemBarUtil.setStatusBackgroundColor(getWindow(), Color.TRANSPARENT);
+                SystemBarUtils.setTransparentStatus(getWindow());
             } else {
-                SystemBarUtil.setTranslucentStatus(getWindow(), true);
+                SystemBarUtils.setTranslucentStatus(getWindow(), true);
             }
-            SystemBarUtil.setTranslucentNavigation(getWindow(), true);
 
-            final int statusHeight = SystemBarUtil.getStatusHeight(this);
+            final int statusHeight = SystemBarUtils.getStatusHeight(this);
             mToolbar.getLayoutParams().height += statusHeight;
             mToolbar.setPadding(mToolbar.getPaddingLeft(),
                     mToolbar.getPaddingTop() + statusHeight,
-                    mToolbar.getPaddingRight(), mToolbar.getPaddingBottom());
+                    mToolbar.getPaddingRight(),
+                    mToolbar.getPaddingBottom());
         }
 
         ListView listView = findViewById(R.id.listview);
@@ -141,8 +141,7 @@ public class MainActivity extends AppCompatActivity implements SlidingDrawerLayo
                 }
                 convertView.setTag(position);
 
-                TextView textView = (TextView) convertView;
-                textView.setText((CharSequence) getItem(position));
+                ((TextView) convertView).setText((String) getItem(position));
                 return convertView;
             }
         });
@@ -182,8 +181,8 @@ public class MainActivity extends AppCompatActivity implements SlidingDrawerLayo
                     mSlidingDrawerLayout.openDrawer(GravityCompat.START, true);
                 return true;
             case R.id.option_see_github:
-                startActivity(new Intent(Intent.ACTION_VIEW).setData(
-                        Uri.parse("https://github.com/freeze-frame/SlidingDrawerLayout")));
+                startActivity(new Intent(Intent.ACTION_VIEW)
+                        .setData(Uri.parse("https://github.com/freeze-frame/SlidingDrawerLayout")));
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -208,7 +207,7 @@ public class MainActivity extends AppCompatActivity implements SlidingDrawerLayo
         final int alpha = (int) (0x7F + 0xFF * Math.abs(0.5f - percent) + 0.5f) << 24;
 
         if (mColorPrimary == INVALID_COLOR)
-            mColorPrimary = ResourcesCompat.getColor(getResources(), R.color.colorPrimary, getTheme());
+            mColorPrimary = ContextCompat.getColor(this, R.color.colorPrimary);
         final int background = (light ? Color.WHITE : mColorPrimary) & 0X00FFFFFF | alpha;
         mToolbar.setBackgroundColor(background);
 
@@ -217,9 +216,16 @@ public class MainActivity extends AppCompatActivity implements SlidingDrawerLayo
         mToolbar.setTitleTextColor(foreground);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            SystemBarUtil.setLightStatus(getWindow(), light);
-        } else {
-            SystemBarUtil.setLightStatusForMiuiOrFlyMe(getWindow(), light);
+            SystemBarUtils.setLightStatus(getWindow(), light);
+            // MIUI6...
+        } else if (OSHelper.getMiuiVersion() >= 6) {
+            SystemBarUtils.setLightStatusForMIUI(getWindow(), light);
+            // FlyMe4...
+        } else if (OSHelper.isFlyme4OrLater()) {
+            SystemBarUtils.setLightStatusForFlyme(getWindow(), light);
+
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            SystemBarUtils.setTranslucentStatus(getWindow(), light);
         }
     }
 

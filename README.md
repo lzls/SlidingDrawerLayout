@@ -29,10 +29,9 @@ A layout derived from ViewGroup, not any other indirect container, such as Frame
     <!-- layout_gravity must be explicitly set, which will determine the drawer's placement -->
 
     <!-- below is your content view -->
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="match_parent">
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar"
@@ -40,7 +39,6 @@ A layout derived from ViewGroup, not any other indirect container, such as Frame
             android:layout_height="?android:attr/actionBarSize"
             app:contentInsetStartWithNavigation="0dp"
             android:background="@color/colorPrimary"
-            android:elevation="4dp"
             app:title="@string/app_name"
             app:titleTextAppearance="@style/ActionBarTitleAppearance" />
 
@@ -48,16 +46,23 @@ A layout derived from ViewGroup, not any other indirect container, such as Frame
             android:id="@+id/listview"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_below="@id/toolbar"
             android:scrollbars="vertical" />
-    </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="4dp"
+            android:layout_below="@id/toolbar"
+            android:background="@drawable/shadow_actionbar" />
+    </RelativeLayout>
 </com.liuzhenlin.sliding_drawer.SlidingDrawerLayout>
 ```
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <com.liuzhenlin.sliding_drawer.SlidingDrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/slidingDrawer"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/slidingDrawerLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".view.activity.MainActivity">
@@ -72,10 +77,10 @@ A layout derived from ViewGroup, not any other indirect container, such as Frame
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scaleType="centerCrop"
-            tools:ignore="ContentDescription" />
+            android:contentDescription="@string/drawerBackground" />
 
         <ListView
-            android:id="@+id/listview"
+            android:id="@+id/list_drawer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:scrollbars="none"
@@ -83,26 +88,10 @@ A layout derived from ViewGroup, not any other indirect container, such as Frame
             android:layout_gravity="center_vertical" />
     </FrameLayout>
 
-    <LinearLayout
+    <FrameLayout
+        android:id="@+id/fragment_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
-
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?android:attr/actionBarSize"
-            android:background="@drawable/bg_actionbar"
-            android:elevation="4dp"
-            app:title="@string/app_name"
-            app:titleTextAppearance="@style/ActionBarTitleAppearance" />
-
-        <com.liuzhenlin.swipe_menu_recycler_view.SwipeMenuRecyclerView
-            android:id="@+id/recycler_videoList"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scrollbars="vertical" />
-    </LinearLayout>
+        android:layout_height="match_parent" />
 </com.liuzhenlin.sliding_drawer.SlidingDrawerLayout>
 ```
 
@@ -127,7 +116,7 @@ public class MainActivity extends AppCompatActivity implements SlidingDrawerLayo
 
         DisplayMetrics metrics = getResources().getDisplayMetrics();
         final int screenWidth = metrics.widthPixels;
-        Drawable icon = ResourcesCompat.getDrawable(getResources(), R.mipmap.ic_launcher_round, getTheme());
+        Drawable icon = ContextCompat.getDrawable(this, R.mipmap.ic_launcher_round);
         assert icon != null;
         final float width_dif = (float) icon.getIntrinsicWidth() + 20f * metrics.density;
         mSlidingDrawerLayout = findViewById(R.id.sliding_drawer_layout);
@@ -136,7 +125,7 @@ public class MainActivity extends AppCompatActivity implements SlidingDrawerLayo
         mSlidingDrawerLayout.addOnDrawerScrollListener(this);
         // During this activity starting, its content view will be measured at least twice, and
         // the width of SlidingDrawerLayout will not be correct till the second measurement is done.
-        // For that reason, we need to post twice to execute our action -- to open its drawer
+        // For that reason, we need to post twice to execute our action — to open its drawer
         // immediately after the second measurement.
         mSlidingDrawerLayout.post(new Runnable() {
             @Override
@@ -180,18 +169,17 @@ public class MainActivity extends AppCompatActivity implements SlidingDrawerLayo
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                SystemBarUtil.setTranslucentStatus(getWindow(), false);
-                SystemBarUtil.setStatusBackgroundColor(getWindow(), Color.TRANSPARENT);
+                SystemBarUtils.setTransparentStatus(getWindow());
             } else {
-                SystemBarUtil.setTranslucentStatus(getWindow(), true);
+                SystemBarUtils.setTranslucentStatus(getWindow(), true);
             }
-            SystemBarUtil.setTranslucentNavigation(getWindow(), true);
 
-            final int statusHeight = SystemBarUtil.getStatusHeight(this);
+            final int statusHeight = SystemBarUtils.getStatusHeight(this);
             mToolbar.getLayoutParams().height += statusHeight;
             mToolbar.setPadding(mToolbar.getPaddingLeft(),
                     mToolbar.getPaddingTop() + statusHeight,
-                    mToolbar.getPaddingRight(), mToolbar.getPaddingBottom());
+                    mToolbar.getPaddingRight(),
+                    mToolbar.getPaddingBottom());
         }
 
         ListView listView = findViewById(R.id.listview);
@@ -219,8 +207,7 @@ public class MainActivity extends AppCompatActivity implements SlidingDrawerLayo
                 }
                 convertView.setTag(position);
 
-                TextView textView = (TextView) convertView;
-                textView.setText((CharSequence) getItem(position));
+                ((TextView) convertView).setText((String) getItem(position));
                 return convertView;
             }
         });
@@ -260,8 +247,8 @@ public class MainActivity extends AppCompatActivity implements SlidingDrawerLayo
                     mSlidingDrawerLayout.openDrawer(GravityCompat.START, true);
                 return true;
             case R.id.option_see_github:
-                startActivity(new Intent(Intent.ACTION_VIEW).setData(
-                        Uri.parse("https://github.com/freeze-frame/SlidingDrawerLayout")));
+                startActivity(new Intent(Intent.ACTION_VIEW)
+                        .setData(Uri.parse("https://github.com/freeze-frame/SlidingDrawerLayout")));
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -286,7 +273,7 @@ public class MainActivity extends AppCompatActivity implements SlidingDrawerLayo
         final int alpha = (int) (0x7F + 0xFF * Math.abs(0.5f - percent) + 0.5f) << 24;
 
         if (mColorPrimary == INVALID_COLOR)
-            mColorPrimary = ResourcesCompat.getColor(getResources(), R.color.colorPrimary, getTheme());
+            mColorPrimary = ContextCompat.getColor(this, R.color.colorPrimary);
         final int background = (light ? Color.WHITE : mColorPrimary) & 0X00FFFFFF | alpha;
         mToolbar.setBackgroundColor(background);
 
@@ -295,9 +282,16 @@ public class MainActivity extends AppCompatActivity implements SlidingDrawerLayo
         mToolbar.setTitleTextColor(foreground);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            SystemBarUtil.setLightStatus(getWindow(), light);
-        } else {
-            SystemBarUtil.setLightStatusForMiuiOrFlyMe(getWindow(), light);
+            SystemBarUtils.setLightStatus(getWindow(), light);
+            // MIUI6...
+        } else if (OSHelper.getMiuiVersion() >= 6) {
+            SystemBarUtils.setLightStatusForMIUI(getWindow(), light);
+            // FlyMe4...
+        } else if (OSHelper.isFlyme4OrLater()) {
+            SystemBarUtils.setLightStatusForFlyme(getWindow(), light);
+
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            SystemBarUtils.setTranslucentStatus(getWindow(), light);
         }
     }
 
@@ -326,7 +320,7 @@ Step 1. Add the JitPack repository in your root build.gradle at the end of repos
 Step 2. Add the dependency
 ```gradle
 	dependencies {
-	        compile 'com.github.freeze-frame:SlidingDrawerLayout:v1.0'
+	        compile 'com.github.freeze-frame:SlidingDrawerLayout:v1.1'
 	}
 ```
 
@@ -346,5 +340,3 @@ Unless required by applicable law or agreed to in writing, software distributed 
 is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
 or implied. See the License for the specific language governing permissions and limitations
 under the License.
-
-

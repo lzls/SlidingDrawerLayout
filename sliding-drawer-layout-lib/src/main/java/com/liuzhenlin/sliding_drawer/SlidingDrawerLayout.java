@@ -18,7 +18,6 @@ import android.support.annotation.ColorInt;
 import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.util.ArraySet;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.ViewDragHelper;
@@ -35,8 +34,9 @@ import android.view.ViewParent;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Set;
+import java.util.List;
 
 /**
  * A layout shows better than {@link android.support.v4.widget.DrawerLayout}, which can
@@ -97,7 +97,7 @@ public class SlidingDrawerLayout extends ViewGroup {
      */
     public static final float MAXIMUM_DRAWER_WIDTH_PERCENT = 0.9f;
 
-    private int mFlags;
+    private int mFlags = FLAG_LEFT_DRAWER_ENABLED | FLAG_RIGHT_DRAWER_ENABLED;
 
     /** No drawer is currently scrolling. */
     public static final int SCROLL_STATE_IDLE = 0;
@@ -111,9 +111,8 @@ public class SlidingDrawerLayout extends ViewGroup {
      */
     public static final int SCROLL_STATE_AUTO_SCROLL = 1 << 1;
 
-    private static final int SCROLL_STATE_MASK = 0x3;
+    private static final int SCROLL_STATE_MASK = 0b0000_0011;
 
-    @SuppressWarnings("WeakerAccess")
     @IntDef({
             SCROLL_STATE_IDLE,
             SCROLL_STATE_TOUCH_SCROLL,
@@ -124,27 +123,37 @@ public class SlidingDrawerLayout extends ViewGroup {
     }
 
     /**
+     * A flag indicates that the left drawer {@link #mLeftDrawer} is enabled
+     */
+    private static final int FLAG_LEFT_DRAWER_ENABLED = 1 << 2;
+
+    /**
+     * A flag indicates that the right drawer {@link #mRightDrawer} is enabled
+     */
+    private static final int FLAG_RIGHT_DRAWER_ENABLED = 1 << 3;
+
+    /**
      * A flag indicates that the left drawer {@link #mLeftDrawer} is slidable
      * with the current measurements.
      */
-    private static final int FLAG_LEFT_DRAWER_SLIDABLE = 1 << 2;
+    private static final int FLAG_LEFT_DRAWER_SLIDABLE = 1 << 4;
 
     /**
      * A flag indicates that the right drawer {@link #mRightDrawer} is slidable
      * with the current measurements.
      */
-    private static final int FLAG_RIGHT_DRAWER_SLIDABLE = 1 << 3;
+    private static final int FLAG_RIGHT_DRAWER_SLIDABLE = 1 << 5;
 
     /**
      * A flag indicates that the current layout is undergoing a layout pass.
      */
-    private static final int FLAG_IN_LAYOUT = 1 << 4;
+    private static final int FLAG_IN_LAYOUT = 1 << 6;
 
     /**
      * Indicates that on this view receiving {@link MotionEvent#ACTION_DOWN}, the user's finger
      * downs on the area of content view {@link #mContentView} while a drawer is open.
      */
-    private static final int FLAG_FINGER_DOWNS_ON_CONTENT_WHEN_DRAWER_IS_OPEN = 1 << 5;
+    private static final int FLAG_FINGER_DOWNS_ON_CONTENT_WHEN_DRAWER_IS_OPEN = 1 << 7;
 
     /**
      * @see #getSensibleContentEdgeSize()
@@ -372,7 +381,8 @@ public class SlidingDrawerLayout extends ViewGroup {
                 && (percent < MINIMUM_DRAWER_WIDTH_PERCENT || percent > MAXIMUM_DRAWER_WIDTH_PERCENT)) {
             throw new IllegalArgumentException("Invalid percent for drawer's width. " +
                     "The value must be " + UNSPECIFIED_DRAWER_WIDTH_PERCENT + " or " +
-                    "from " + MINIMUM_DRAWER_WIDTH_PERCENT + " to " + MAXIMUM_DRAWER_WIDTH_PERCENT);
+                    "from " + MINIMUM_DRAWER_WIDTH_PERCENT + " to " + MAXIMUM_DRAWER_WIDTH_PERCENT +
+                    ", but your is " + percent);
         }
     }
 
@@ -423,10 +433,76 @@ public class SlidingDrawerLayout extends ViewGroup {
      */
     public void setSensibleContentEdgeSize(float size) {
         if (size < 0) {
-            throw new IllegalArgumentException("the sensible size for the draggable edges " +
-                    "of content view must >= 0.");
+            throw new IllegalArgumentException("The sensible size for the draggable edges " +
+                    "of content view must >= 0, but your is " + size);
         }
         mSensibleContentEdgeSize = size;
+    }
+
+    /**
+     * Enables the drawer on the specified side
+     *
+     * @see #setDrawerEnabled(View, boolean)
+     */
+    @SuppressLint("RtlHardcoded")
+    public void setDrawerEnabled(@EdgeGravity int gravity, boolean enabled) {
+        final int absoluteGravity = GravityCompat.getAbsoluteGravity(gravity,
+                ViewCompat.getLayoutDirection(this));
+        switch (absoluteGravity) {
+            case Gravity.LEFT:
+                setDrawerEnabled(mLeftDrawer, enabled);
+                break;
+            case Gravity.RIGHT:
+                setDrawerEnabled(mRightDrawer, enabled);
+                break;
+        }
+    }
+
+    /**
+     * Enables the specified drawer
+     *
+     * @see #setDrawerEnabled(int, boolean)
+     */
+    public void setDrawerEnabled(View drawer, boolean enabled) {
+        if (drawer == mLeftDrawer) {
+            if (enabled) {
+                mFlags |= FLAG_LEFT_DRAWER_ENABLED;
+            } else {
+                mFlags &= ~FLAG_LEFT_DRAWER_ENABLED;
+            }
+        } else if (drawer == mRightDrawer) {
+            if (enabled) {
+                mFlags |= FLAG_RIGHT_DRAWER_ENABLED;
+            } else {
+                mFlags &= ~FLAG_RIGHT_DRAWER_ENABLED;
+            }
+        }
+    }
+
+    /**
+     * @return whether the drawer on the specified side is enabled or not
+     * @see #isDrawerEnabled(View)
+     */
+    @SuppressLint("RtlHardcoded")
+    public boolean isDrawerEnabled(@EdgeGravity int gravity) {
+        final int absoluteGravity = GravityCompat.getAbsoluteGravity(gravity,
+                ViewCompat.getLayoutDirection(this));
+        switch (absoluteGravity) {
+            case Gravity.LEFT:
+                return isDrawerEnabled(mLeftDrawer);
+            case Gravity.RIGHT:
+                return isDrawerEnabled(mRightDrawer);
+        }
+        return false;
+    }
+
+    /**
+     * @return whether the specified drawer is enabled or not
+     * @see #isDrawerEnabled(int)
+     */
+    public boolean isDrawerEnabled(View drawer) {
+        return drawer == mLeftDrawer && (mFlags & FLAG_LEFT_DRAWER_ENABLED) != 0
+                || drawer == mRightDrawer && (mFlags & FLAG_RIGHT_DRAWER_ENABLED) != 0;
     }
 
     /**
@@ -439,11 +515,9 @@ public class SlidingDrawerLayout extends ViewGroup {
                 ViewCompat.getLayoutDirection(this));
         switch (absoluteGravity) {
             case Gravity.LEFT:
-                isDrawerSlidable(mLeftDrawer);
-                break;
+                return isDrawerSlidable(mLeftDrawer);
             case Gravity.RIGHT:
-                isDrawerSlidable(mRightDrawer);
-                break;
+                return isDrawerSlidable(mRightDrawer);
         }
         return false;
     }
@@ -453,8 +527,14 @@ public class SlidingDrawerLayout extends ViewGroup {
      * @see #isDrawerSlidable(int)
      */
     public boolean isDrawerSlidable(View drawer) {
-        return drawer == mLeftDrawer && (mFlags & FLAG_LEFT_DRAWER_SLIDABLE) != 0
-                || drawer == mRightDrawer && (mFlags & FLAG_RIGHT_DRAWER_SLIDABLE) != 0;
+        if (drawer == mLeftDrawer) {
+            return (mFlags & (FLAG_LEFT_DRAWER_ENABLED)) != 0 &&
+                    (mFlags & FLAG_LEFT_DRAWER_SLIDABLE) != 0;
+        } else if (drawer == mRightDrawer) {
+            return (mFlags & FLAG_RIGHT_DRAWER_ENABLED) != 0 &&
+                    (mFlags & FLAG_RIGHT_DRAWER_SLIDABLE) != 0;
+        }
+        return false;
     }
 
     /**
@@ -858,7 +938,6 @@ public class SlidingDrawerLayout extends ViewGroup {
         return new LayoutParams(lp);
     }
 
-    @SuppressWarnings("WeakerAccess")
     public static class LayoutParams extends ViewGroup.LayoutParams {
         /**
          * The gravity to apply with the View to which these layout parameters are associated.
@@ -929,7 +1008,7 @@ public class SlidingDrawerLayout extends ViewGroup {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        if ((mFlags & (FLAG_LEFT_DRAWER_SLIDABLE | FLAG_RIGHT_DRAWER_SLIDABLE)) == 0) {
+        if (!isDrawerSlidable(mLeftDrawer) && !isDrawerSlidable(mRightDrawer)) {
             return super.onInterceptTouchEvent(ev);
         }
         switch (ev.getAction() & MotionEvent.ACTION_MASK) {
@@ -990,7 +1069,7 @@ public class SlidingDrawerLayout extends ViewGroup {
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if ((mFlags & (FLAG_LEFT_DRAWER_SLIDABLE | FLAG_RIGHT_DRAWER_SLIDABLE)) == 0) {
+        if (!isDrawerSlidable(mLeftDrawer) && !isDrawerSlidable(mRightDrawer)) {
             return super.onTouchEvent(event);
         }
         switch (event.getAction() & MotionEvent.ACTION_MASK) {
@@ -1207,8 +1286,8 @@ public class SlidingDrawerLayout extends ViewGroup {
 
     /**
      * Automatically open the specified drawer. <br>
-     * <b>Note that this will only work if there is no drawer opened or the specified drawer is
-     * the one currently being dragged.</b>
+     * <strong>Note that this will only work if there is no drawer opened or the drawer is
+     * the one currently being dragged.</strong>
      *
      * @param animate smoothly open it through animator or not
      * @see #openDrawer(int, boolean)
@@ -1320,7 +1399,7 @@ public class SlidingDrawerLayout extends ViewGroup {
 
         if (mOnDrawerScrollListeners != null) {
             OnDrawerScrollListener[] listeners = mOnDrawerScrollListeners
-                    .toArray(new OnDrawerScrollListener[mOnDrawerScrollListeners.size()]);
+                    .toArray(new OnDrawerScrollListener[0]);
             // After each loop, the count of OnDrawerScrollListeners associated to this view
             // might have changed as addOnDrawerScrollListener, removeOnDrawerScrollListener or
             // clearOnDrawerScrollListeners method can be called during callbacks to any listener,
@@ -1345,19 +1424,23 @@ public class SlidingDrawerLayout extends ViewGroup {
             mFlags = (mFlags & ~SCROLL_STATE_MASK) | state;
             if (mOnDrawerScrollListeners != null) {
                 OnDrawerScrollListener[] listeners = mOnDrawerScrollListeners
-                        .toArray(new OnDrawerScrollListener[mOnDrawerScrollListeners.size()]);
+                        .toArray(new OnDrawerScrollListener[0]);
                 for (OnDrawerScrollListener listener : listeners)
                     listener.onScrollStateChange(this, mShownDrawer, state);
             }
         }
     }
 
-    private Set<OnDrawerScrollListener> mOnDrawerScrollListeners;
+    private List<OnDrawerScrollListener> mOnDrawerScrollListeners;
     private OnDrawerScrollListener mInternalOnDrawerScrollListener;
 
     public void addOnDrawerScrollListener(OnDrawerScrollListener listener) {
-        if (mOnDrawerScrollListeners == null)
-            mOnDrawerScrollListeners = new ArraySet<>(1);
+        if (mOnDrawerScrollListeners == null) {
+            mOnDrawerScrollListeners = new ArrayList<>(1);
+
+        } else if (mOnDrawerScrollListeners.contains(listener)) {
+            return;
+        }
         mOnDrawerScrollListeners.add(listener);
     }
 

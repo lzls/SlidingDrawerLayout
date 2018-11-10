@@ -19,13 +19,15 @@ A layout derived from ViewGroup, not any other indirect container, such as Frame
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <ImageView
+    <!--
+      ~ Use a ViewStub to lazily inflate the drawer View for the purpose of avoiding unnecessary
+      ~ performance overhead before that View shown to the user.
+      -->
+    <ViewStub
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:src="@drawable/picture"
-        android:scaleType="centerCrop"
-        tools:ignore="ContentDescription"
-        app:layout_gravity="start" />
+        android:layout="@layout/image_drawer"
+        android:layout_gravity="start" />
     <!-- layout_gravity must be explicitly set, which will determine the drawer's placement -->
 
     <!-- below is your content view -->
@@ -57,43 +59,6 @@ A layout derived from ViewGroup, not any other indirect container, such as Frame
     </RelativeLayout>
 </com.liuzhenlin.sliding_drawer.SlidingDrawerLayout>
 ```
-```xml
-<?xml version="1.0" encoding="utf-8"?>
-<com.liuzhenlin.sliding_drawer.SlidingDrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/slidingDrawerLayout"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".view.activity.MainActivity">
-
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_gravity="start">
-
-        <ImageView
-            android:id="@+id/image_drawer"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scaleType="centerCrop"
-            android:contentDescription="@string/drawerBackground" />
-
-        <ListView
-            android:id="@+id/list_drawer"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:scrollbars="none"
-            android:overScrollMode="never"
-            android:layout_gravity="center_vertical" />
-    </FrameLayout>
-
-    <FrameLayout
-        android:id="@+id/fragment_container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-</com.liuzhenlin.sliding_drawer.SlidingDrawerLayout>
-```
 
 ## Usages:
 ```Java
@@ -108,6 +73,7 @@ public class MainActivity extends AppCompatActivity implements SlidingDrawerLayo
     private static final int INVALID_COLOR = -1;
 
     private SlidingDrawerLayout mSlidingDrawerLayout;
+    private ListView mListView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -120,22 +86,15 @@ public class MainActivity extends AppCompatActivity implements SlidingDrawerLayo
         assert icon != null;
         final float width_dif = (float) icon.getIntrinsicWidth() + 20f * metrics.density;
         mSlidingDrawerLayout = findViewById(R.id.sliding_drawer_layout);
-        mSlidingDrawerLayout.setSensibleContentEdgeSize(screenWidth);
+        mSlidingDrawerLayout.setContentSensitiveEdgeSize(screenWidth);
         mSlidingDrawerLayout.setStartDrawerWidthPercent(1f - width_dif / (float) screenWidth);
         mSlidingDrawerLayout.addOnDrawerScrollListener(this);
-        // During this activity starting, its content view will be measured at least twice, and
-        // the width of SlidingDrawerLayout will not be correct till the second measurement is done.
-        // For that reason, we need to post twice to execute our action — to open its drawer
-        // immediately after the second measurement.
+        // At this activity starting, none of the drawers of SlidingDrawerLayout are available
+        // as in most cases their measurements are not yet started.
         mSlidingDrawerLayout.post(new Runnable() {
             @Override
             public void run() {
-                mSlidingDrawerLayout.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        mSlidingDrawerLayout.openDrawer(GravityCompat.START, true);
-                    }
-                });
+                mSlidingDrawerLayout.openDrawer(GravityCompat.START, true);
             }
         });
 
@@ -182,8 +141,8 @@ public class MainActivity extends AppCompatActivity implements SlidingDrawerLayo
                     mToolbar.getPaddingBottom());
         }
 
-        ListView listView = findViewById(R.id.listview);
-        listView.setAdapter(new BaseAdapter() {
+        mListView = findViewById(R.id.listview);
+        mListView.setAdapter(new BaseAdapter() {
             @Override
             public int getCount() {
                 return 20;
@@ -211,7 +170,7 @@ public class MainActivity extends AppCompatActivity implements SlidingDrawerLayo
                 return convertView;
             }
         });
-        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+        mListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
                 Toast.makeText(view.getContext(), "itemView " + position
@@ -219,15 +178,6 @@ public class MainActivity extends AppCompatActivity implements SlidingDrawerLayo
                 return true;
             }
         });
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (mSlidingDrawerLayout.isDrawerOpen()) {
-            mSlidingDrawerLayout.closeDrawer(true);
-            return;
-        }
-        super.onBackPressed();
     }
 
     @Override
@@ -241,7 +191,7 @@ public class MainActivity extends AppCompatActivity implements SlidingDrawerLayo
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                if (mSlidingDrawerLayout.isDrawerOpen())
+                if (mSlidingDrawerLayout.hasDrawerOpen())
                     mSlidingDrawerLayout.closeDrawer(true);
                 else
                     mSlidingDrawerLayout.openDrawer(GravityCompat.START, true);
@@ -256,17 +206,17 @@ public class MainActivity extends AppCompatActivity implements SlidingDrawerLayo
     }
 
     @Override
-    public void onDrawerOpened(SlidingDrawerLayout parent, View drawer) {
+    public void onDrawerOpened(@NonNull SlidingDrawerLayout parent, @NonNull View drawer) {
 
     }
 
     @Override
-    public void onDrawerClosed(SlidingDrawerLayout parent, View drawer) {
+    public void onDrawerClosed(@NonNull SlidingDrawerLayout parent, @NonNull View drawer) {
 
     }
 
     @Override
-    public void onScrollPercentChange(SlidingDrawerLayout parent, View drawer, float percent) {
+    public void onScrollPercentChange(@NonNull SlidingDrawerLayout parent, @NonNull View drawer, float percent) {
         mHomeAsUpIndicator.setProgress(percent);
 
         final boolean light = percent >= 0.5f;
@@ -296,9 +246,17 @@ public class MainActivity extends AppCompatActivity implements SlidingDrawerLayo
     }
 
     @Override
-    public void onScrollStateChange(SlidingDrawerLayout parent, View drawer,
+    public void onScrollStateChange(@NonNull SlidingDrawerLayout parent, @NonNull View drawer,
                                     @SlidingDrawerLayout.ScrollState int state) {
-
+        switch (state) {
+            case SlidingDrawerLayout.SCROLL_STATE_TOUCH_SCROLL:
+            case SlidingDrawerLayout.SCROLL_STATE_AUTO_SCROLL:
+                mListView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+                break;
+            case SlidingDrawerLayout.SCROLL_STATE_IDLE:
+                mListView.setLayerType(View.LAYER_TYPE_NONE, null);
+                break;
+        }
     }
 }
 ```
@@ -320,7 +278,7 @@ Step 1. Add the JitPack repository in your root build.gradle at the end of repos
 Step 2. Add the dependency
 ```gradle
 	dependencies {
-	        compile 'com.github.freeze-frame:SlidingDrawerLayout:v1.1'
+	        compile 'com.github.freeze-frame:SlidingDrawerLayout:v1.2'
 	}
 ```
 

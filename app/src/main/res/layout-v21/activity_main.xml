@@ -7,13 +7,15 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <ImageView
+    <!--
+      ~ Use a ViewStub to lazily inflate the drawer View for the purpose of avoiding unnecessary
+      ~ performance overhead before that View shown to the user.
+      -->
+    <ViewStub
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:src="@drawable/picture"
-        android:scaleType="centerCrop"
-        android:contentDescription="@string/drawerBackground"
-        app:layout_gravity="start" />
+        android:layout="@layout/image_drawer"
+        android:layout_gravity="start" />
     <!-- layout_gravity must be explicitly set, which will determine the drawer's placement -->
 
     <!-- below is your content view -->

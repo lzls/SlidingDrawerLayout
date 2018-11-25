@@ -3,7 +3,7 @@
  * Copyright © 2018 刘振林. All rights reserved.
  */
 
-package com.liuzhenlin.sliding_drawer_sample.utils;
+package com.liuzhenlin.sliding_drawer_layout.sample.utils;
 
 import android.text.TextUtils;
 

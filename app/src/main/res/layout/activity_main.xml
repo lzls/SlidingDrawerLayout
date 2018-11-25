@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.liuzhenlin.sliding_drawer.SlidingDrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.liuzhenlin.sliding_drawer_layout.SlidingDrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/sliding_drawer_layout"
@@ -14,9 +14,15 @@
     <ViewStub
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout="@layout/image_drawer"
+        android:layout="@layout/image_start_drawer"
         android:layout_gravity="start" />
     <!-- layout_gravity must be explicitly set, which will determine the drawer's placement -->
+
+    <ViewStub
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout="@layout/image_end_drawer"
+        android:layout_gravity="end" />
 
     <!-- below is your content view -->
     <RelativeLayout
@@ -45,4 +51,4 @@
             android:layout_below="@id/toolbar"
             android:background="@drawable/shadow_actionbar" />
     </RelativeLayout>
-</com.liuzhenlin.sliding_drawer.SlidingDrawerLayout>
+</com.liuzhenlin.sliding_drawer_layout.SlidingDrawerLayout>

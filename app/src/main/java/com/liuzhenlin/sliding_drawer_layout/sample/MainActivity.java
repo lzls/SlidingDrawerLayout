@@ -1,4 +1,4 @@
-package com.liuzhenlin.sliding_drawer_sample;
+package com.liuzhenlin.sliding_drawer_layout.sample;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
@@ -11,11 +11,14 @@ import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.graphics.drawable.DrawerArrowDrawable;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -26,9 +29,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.liuzhenlin.sliding_drawer.SlidingDrawerLayout;
-import com.liuzhenlin.sliding_drawer_sample.utils.OSHelper;
-import com.liuzhenlin.sliding_drawer_sample.utils.SystemBarUtils;
+import com.liuzhenlin.sliding_drawer_layout.SlidingDrawerLayout;
+import com.liuzhenlin.sliding_drawer_layout.sample.utils.OSHelper;
+import com.liuzhenlin.sliding_drawer_layout.sample.utils.SystemBarUtils;
 
 import java.lang.reflect.Field;
 
@@ -39,11 +42,14 @@ public class MainActivity extends AppCompatActivity implements SlidingDrawerLayo
     private DrawerArrowDrawable mHomeAsUpIndicator;
     private Toolbar mToolbar;
     @ColorInt
-    private int mColorPrimary = INVALID_COLOR;
-    private static final int INVALID_COLOR = -1;
+    static int sColorPrimary = -1;
 
     private SlidingDrawerLayout mSlidingDrawerLayout;
     private ListView mListView;
+
+    static {
+        AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,14 +65,14 @@ public class MainActivity extends AppCompatActivity implements SlidingDrawerLayo
         mSlidingDrawerLayout.setContentSensitiveEdgeSize(screenWidth);
         mSlidingDrawerLayout.setStartDrawerWidthPercent(1f - width_dif / (float) screenWidth);
         mSlidingDrawerLayout.addOnDrawerScrollListener(this);
-        // At this activity starting, none of the drawers of SlidingDrawerLayout are available
-        // as in most cases their measurements are not yet started.
-        mSlidingDrawerLayout.post(new Runnable() {
-            @Override
-            public void run() {
-                mSlidingDrawerLayout.openDrawer(GravityCompat.START, true);
-            }
-        });
+//        //  At this activity starting, none of the drawers of SlidingDrawerLayout are available
+//        // as in most cases their measurements are not yet started.
+//        mSlidingDrawerLayout.post(new Runnable() {
+//            @Override
+//            public void run() {
+//                mSlidingDrawerLayout.openDrawer(GravityCompat.START, true);
+//            }
+//        });
 
         mToolbar = findViewById(R.id.toolbar);
         mToolbar.post(new Runnable() {
@@ -161,14 +167,14 @@ public class MainActivity extends AppCompatActivity implements SlidingDrawerLayo
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                if (mSlidingDrawerLayout.hasDrawerOpen())
+                if (mSlidingDrawerLayout.hasOpenedDrawer())
                     mSlidingDrawerLayout.closeDrawer(true);
                 else
                     mSlidingDrawerLayout.openDrawer(GravityCompat.START, true);
                 return true;
             case R.id.option_see_github:
                 startActivity(new Intent(Intent.ACTION_VIEW)
-                        .setData(Uri.parse("https://github.com/freeze-frame/SlidingDrawerLayout")));
+                        .setData(Uri.parse("https://github.com/freeze-frames/SlidingDrawerLayout")));
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -176,28 +182,36 @@ public class MainActivity extends AppCompatActivity implements SlidingDrawerLayo
     }
 
     @Override
-    public void onDrawerOpened(@NonNull SlidingDrawerLayout parent, @NonNull View drawer) {
+    public void onBackPressed() {
+        if (mSlidingDrawerLayout.hasOpenedDrawer()) {
+            mSlidingDrawerLayout.closeDrawer(true);
+        } else {
+            super.onBackPressed();
+        }
+    }
 
+    @Override
+    public void onDrawerOpened(@NonNull SlidingDrawerLayout parent, @NonNull View drawer) {
     }
 
     @Override
     public void onDrawerClosed(@NonNull SlidingDrawerLayout parent, @NonNull View drawer) {
-
     }
 
     @Override
-    public void onScrollPercentChange(@NonNull SlidingDrawerLayout parent, @NonNull View drawer, float percent) {
+    public void onScrollPercentChange(@NonNull SlidingDrawerLayout parent,
+                                      @NonNull View drawer, float percent) {
         mHomeAsUpIndicator.setProgress(percent);
 
         final boolean light = percent >= 0.5f;
         final int alpha = (int) (0x7F + 0xFF * Math.abs(0.5f - percent) + 0.5f) << 24;
 
-        if (mColorPrimary == INVALID_COLOR)
-            mColorPrimary = ContextCompat.getColor(this, R.color.colorPrimary);
-        final int background = (light ? Color.WHITE : mColorPrimary) & 0X00FFFFFF | alpha;
+        if (sColorPrimary == -1)
+            sColorPrimary = ContextCompat.getColor(this, R.color.colorPrimary);
+        final int background = (light ? Color.WHITE : sColorPrimary) & 0x00FFFFFF | alpha;
         mToolbar.setBackgroundColor(background);
 
-        final int foreground = (light ? Color.BLACK : Color.WHITE) & 0X00FFFFFF | alpha;
+        final int foreground = (light ? Color.BLACK : Color.WHITE) & 0x00FFFFFF | alpha;
         mHomeAsUpIndicator.setColor(foreground);
         mToolbar.setTitleTextColor(foreground);
 
@@ -221,6 +235,16 @@ public class MainActivity extends AppCompatActivity implements SlidingDrawerLayo
         switch (state) {
             case SlidingDrawerLayout.SCROLL_STATE_TOUCH_SCROLL:
             case SlidingDrawerLayout.SCROLL_STATE_AUTO_SCROLL:
+                // android:background attr set with a vector drawable resource id is not supported
+                // on platforms prior to Lollipop
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP &&
+                        drawer.getBackground() == null &&
+                        (((SlidingDrawerLayout.LayoutParams) drawer.getLayoutParams()).gravity
+                                & Gravity.RELATIVE_HORIZONTAL_GRAVITY_MASK) == Gravity.END) {
+                    ViewCompat.setBackground(drawer,
+                            ContextCompat.getDrawable(this, R.drawable.ic_launcher_background));
+                }
+
                 mListView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
                 break;
             case SlidingDrawerLayout.SCROLL_STATE_IDLE:

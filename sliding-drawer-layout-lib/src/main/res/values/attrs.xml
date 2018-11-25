@@ -14,10 +14,10 @@
             <enum name="unspecified" value="0" />
         </attr>
 
-        <attr name="enabled_leftDrawer" format="boolean" />
-        <attr name="enabled_rightDrawer" format="boolean" />
-        <attr name="enabled_startDrawer" format="boolean" />
-        <attr name="enabled_endDrawer" format="boolean" />
+        <attr name="enabledInTouch_leftDrawer" format="boolean" />
+        <attr name="enabledInTouch_rightDrawer" format="boolean" />
+        <attr name="enabledInTouch_startDrawer" format="boolean" />
+        <attr name="enabledInTouch_endDrawer" format="boolean" />
 
         <attr name="contentSensitiveEdgeSize" format="dimension" />
 
@@ -25,7 +25,7 @@
 
         <attr name="duration" format="integer" />
 
-        <attr name="closeOpenDrawerOnBackPressedEnabled" format="boolean" />
+        <!--<attr name="closeOpenDrawerOnBackPressedEnabled" format="boolean" />-->
     </declare-styleable>
 
     <declare-styleable name="SlidingDrawerLayout_Layout">

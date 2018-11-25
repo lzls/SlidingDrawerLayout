@@ -1,4 +1,4 @@
-package com.liuzhenlin.sliding_drawer;
+package com.liuzhenlin.sliding_drawer_layout.sample;
 
 import org.junit.Test;
 

@@ -3,7 +3,7 @@
  * Copyright © 2018 刘振林. All rights reserved.
  */
 
-package com.liuzhenlin.sliding_drawer;
+package com.liuzhenlin.sliding_drawer_layout;
 
 import android.os.Build;
 import android.support.annotation.NonNull;
@@ -17,9 +17,12 @@ import android.view.View;
  */
 public class Utils {
     public static int getAbsoluteHorizontalGravity(@NonNull View parent, int gravity) {
+        return getAbsoluteGravity(parent, gravity) & Gravity.HORIZONTAL_GRAVITY_MASK;
+    }
+
+    public static int getAbsoluteGravity(@NonNull View parent, int gravity) {
         final int layoutDirection = ViewCompat.getLayoutDirection(parent);
-        return GravityCompat.getAbsoluteGravity(gravity, layoutDirection)
-                & Gravity.HORIZONTAL_GRAVITY_MASK;
+        return GravityCompat.getAbsoluteGravity(gravity, layoutDirection);
     }
 
     /**

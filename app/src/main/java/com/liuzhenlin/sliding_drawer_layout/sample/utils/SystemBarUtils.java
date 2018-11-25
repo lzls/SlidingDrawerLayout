@@ -3,7 +3,7 @@
  * Copyright © 2017 刘振林. All rights reserved.
  */
 
-package com.liuzhenlin.sliding_drawer_sample.utils;
+package com.liuzhenlin.sliding_drawer_layout.sample.utils;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -41,12 +41,13 @@ public class SystemBarUtils {
     }
 
     @Px
-    @RequiresApi(Build.VERSION_CODES.KITKAT)
     public static int getNavigationHeight(@NonNull Context context) {
-        final int resId = context.getResources().getIdentifier("navigation_bar_height",
-                "dimen", "android");
-        if (resId > 0) {
-            return context.getResources().getDimensionPixelSize(resId);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+            final int resId = context.getResources().getIdentifier("navigation_bar_height",
+                    "dimen", "android");
+            if (resId > 0) {
+                return context.getResources().getDimensionPixelSize(resId);
+            }
         }
         return 0;
     }
@@ -54,16 +55,18 @@ public class SystemBarUtils {
     /**
      * 判断是否有虚拟按键
      */
-    @SuppressLint("PrivateApi")
-    @RequiresApi(Build.VERSION_CODES.KITKAT)
+    @SuppressLint({"ObsoleteSdkInt", "PrivateApi"})
     public static boolean hasNavigationBar(@NonNull Context context) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+            return false;
+        }
+
         boolean hasNavBar = false;
         final int resId = context.getResources().getIdentifier("config_showNavigationBar",
                 "bool", "android");
         if (resId > 0) {
             hasNavBar = context.getResources().getBoolean(resId);
         }
-
         if (hasNavBar) {
             try {
                 Class<?> systemPropertiesClass = Class.forName("android.os.SystemProperties");
@@ -78,7 +81,6 @@ public class SystemBarUtils {
                 e.printStackTrace();
             }
         }
-
         return hasNavBar;
     }
 
@@ -129,7 +131,7 @@ public class SystemBarUtils {
                 }
             }
 
-            // FIXME hide navigation Permanently.
+            // FIXME: To hide navigation Permanently.
             final int visibility = decorView.getSystemUiVisibility();
             final int hideNavFlags = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
             if (show) {

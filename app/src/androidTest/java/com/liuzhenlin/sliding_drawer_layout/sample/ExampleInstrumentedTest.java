@@ -1,4 +1,4 @@
-package com.liuzhenlin.sliding_drawer;
+package com.liuzhenlin.sliding_drawer_layout.sample;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("com.liuzhenlin.sliding_drawer.test", appContext.getPackageName());
+        assertEquals("com.liuzhenlin.sliding_drawer_layout.sample", appContext.getPackageName());
     }
 }

@@ -4,7 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/SlidingDrawerLayout.iml" filepath="$PROJECT_DIR$/SlidingDrawerLayout.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/sliding-drawer-layout-lib/sliding-drawer-layout-lib.iml" filepath="$PROJECT_DIR$/sliding-drawer-layout-lib/sliding-drawer-layout-lib.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sliding-drawer-layout/sliding-drawer-layout.iml" filepath="$PROJECT_DIR$/sliding-drawer-layout/sliding-drawer-layout.iml" />
     </modules>
   </component>
 </project>

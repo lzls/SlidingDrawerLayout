@@ -9,7 +9,7 @@ A layout derived from ViewGroup, not any other indirect container, such as Frame
 
 ## Layout File Sample:
 ```xml
-<com.liuzhenlin.sliding_drawer_layout.SlidingDrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.liuzhenlin.slidingdrawerlayout.SlidingDrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/sliding_drawer_layout"
@@ -39,7 +39,7 @@ A layout derived from ViewGroup, not any other indirect container, such as Frame
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <android.support.v7.widget.Toolbar
+        <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?android:attr/actionBarSize"
@@ -61,7 +61,7 @@ A layout derived from ViewGroup, not any other indirect container, such as Frame
             android:layout_below="@id/toolbar"
             android:background="@drawable/shadow_actionbar" />
     </RelativeLayout>
-</com.liuzhenlin.sliding_drawer_layout.SlidingDrawerLayout>
+</com.liuzhenlin.slidingdrawerlayout.SlidingDrawerLayout>
 ```
 
 
@@ -76,18 +76,18 @@ A layout derived from ViewGroup, not any other indirect container, such as Frame
     mSlidingDrawerLayout.setStartDrawerWidthPercent(0.8f);
     mSlidingDrawerLayout.setEndDrawerWidthPercent(0.9f);
 
-    mSlidingDrawerLayout.setDrawerEnabledInTouch(GravityCompat.START, true /* default value */);
+    mSlidingDrawerLayout.setDrawerEnabledInTouch(Gravity.START, true /* default value */);
     mSlidingDrawerLayout.setDrawerEnabledInTouch(mEndDrawer, true);
 
     mSlidingDrawerLayout.setDuration(256 /* in milliseconds */);
     mSlidingDrawerLayout.setContentSensitiveEdgeSize(
-            50f * getResources().getDisplayMetrics().density /* in pixels */);
+            (int) (50f * getResources().getDisplayMetrics().density + 0.5f) /* in pixels */);
     mSlidingDrawerLayout.setContentFadeColor(/* ColorInt */ 0xFF_FF4081);
     ```
 
 - Open/Close a Drawer:
     ```Java
-    mSlidingDrawerLayout.openDrawer(GravityCompat.START, /* animate */ true);
+    mSlidingDrawerLayout.openDrawer(Gravity.START, /* animate */ true);
     mSlidingDrawerLayout.openDrawer(mStartDrawer, /* animate */ true);
     mSlidingDrawerLayout.closeDrawer(/* animate */ true);
     ```

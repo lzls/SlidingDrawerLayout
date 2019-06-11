@@ -32,17 +32,12 @@ import android.view.ViewStub;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.Interpolator;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-
 import androidx.annotation.ColorInt;
 import androidx.annotation.FloatRange;
 import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 import androidx.core.os.ParcelableCompat;
 import androidx.core.os.ParcelableCompatCreatorCallbacks;
 import androidx.core.view.AccessibilityDelegateCompat;
@@ -52,6 +47,12 @@ import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
 import androidx.customview.view.AbsSavedState;
 import androidx.customview.widget.ViewDragHelper;
 import androidx.interpolator.view.animation.LinearOutSlowInInterpolator;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * A layout shows better than {@link androidx.drawerlayout.widget.DrawerLayout}, which can also
@@ -1251,19 +1252,19 @@ public class SlidingDrawerLayout extends ViewGroup {
                             "for the Drawer's LayoutParams to finalize the Drawer's placement.");
                 }
 
-                View drawer = null;
+                View drawer;
                 if (mLeftDrawer != null) {
                     if (mLeftDrawer.getVisibility() != GONE) {
                         mFlags |= FLAG_LEFT_DRAWER_IN_LAYOUT;
                     }
                     drawer = mLeftDrawer;
-                } else if (mRightDrawer != null) {
+                } else /*if (mRightDrawer != null)*/ {
                     if (mRightDrawer.getVisibility() != GONE) {
                         mFlags |= FLAG_RIGHT_DRAWER_IN_LAYOUT;
                     }
                     drawer = mRightDrawer;
                 }
-                if (drawer != null && getChildAt(0) != drawer) {
+                if (getChildAt(0) != drawer) {
                     detachViewFromParent(1);
                     attachViewToParent(drawer, 0, drawer.getLayoutParams());
                 }
@@ -1383,12 +1384,22 @@ public class SlidingDrawerLayout extends ViewGroup {
     }
 
     @Override
+    public void onRtlPropertiesChanged(int layoutDirection) {
+        mFlags &= ~FLAG_DRAWER_TOUCH_ABILITIES_RESOLVED
+                | FLAG_START_DRAWER_TOUCH_ABILITY_RESOLVED
+                | FLAG_END_DRAWER_TOUCH_ABILITY_RESOLVED
+                | FLAG_DRAWER_WIDTH_PERCENTAGES_RESOLVED
+                | FLAG_START_DRAWER_WIDTH_PERCENTAGE_RESOLVED
+                | FLAG_END_DRAWER_WIDTH_PERCENTAGE_RESOLVED;
+        resolveDrawerTouchAbilities(layoutDirection);
+        resolveDrawerWidthPercentages(layoutDirection, true);
+    }
+
+    @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         final int childCount = getChildCount();
         final int layoutDirection = ViewCompat.getLayoutDirection(this);
 
-        resolveDrawerTouchAbilities(layoutDirection);
-        resolveDrawerWidthPercentages(layoutDirection, true);
         traverseAllChildren(childCount, layoutDirection);
 
         int maxWidth = 0;
@@ -2650,14 +2661,15 @@ public class SlidingDrawerLayout extends ViewGroup {
      * State persisted across instances
      */
     @SuppressWarnings({"WeakerAccess", "deprecation"})
-    protected static class SavedState extends AbsSavedState {
+    @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
+    public static class SavedState extends AbsSavedState {
         int openDrawerGravity = Gravity.NO_GRAVITY;
 
-        public SavedState(Parcelable superState) {
+        protected SavedState(Parcelable superState) {
             super(superState);
         }
 
-        public SavedState(Parcel in, ClassLoader loader) {
+        protected SavedState(Parcel in, ClassLoader loader) {
             super(in, loader);
             openDrawerGravity = in.readInt();
         }

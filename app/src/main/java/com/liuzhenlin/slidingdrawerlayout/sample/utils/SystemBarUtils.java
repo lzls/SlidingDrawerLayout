@@ -13,15 +13,15 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-
 import androidx.annotation.ColorInt;
 import androidx.annotation.ColorRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Px;
 import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
 /**
  * @author 刘振林
@@ -119,25 +119,24 @@ public class SystemBarUtils {
             decorView.setSystemUiVisibility(flags);
         } else {
             final int flags = window.getAttributes().flags;
-            final int extraFlags = WindowManager.LayoutParams.FLAG_FULLSCREEN
-                    | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+            final int fullscreenFlag = WindowManager.LayoutParams.FLAG_FULLSCREEN;
             if (show) {
-                if ((flags & extraFlags) != 0) {
-                    window.clearFlags(extraFlags);
+                if ((flags & fullscreenFlag) != 0) {
+                    window.clearFlags(fullscreenFlag);
                 }
             } else {
-                if (flags != (flags | extraFlags)) {
-                    window.addFlags(extraFlags);
+                if (flags != (flags | fullscreenFlag)) {
+                    window.addFlags(fullscreenFlag);
                 }
             }
 
             // FIXME: To hide navigation Permanently.
             final int visibility = decorView.getSystemUiVisibility();
-            final int hideNavFlags = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
+            final int hideNavFlag = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
             if (show) {
-                decorView.setSystemUiVisibility(visibility & ~hideNavFlags);
+                decorView.setSystemUiVisibility(visibility & ~hideNavFlag);
             } else {
-                decorView.setSystemUiVisibility(visibility | hideNavFlags);
+                decorView.setSystemUiVisibility(visibility | hideNavFlag);
             }
         }
     }
@@ -145,7 +144,7 @@ public class SystemBarUtils {
     /**
      * 设置 半透明状态栏
      */
-    @RequiresApi(Build.VERSION_CODES.KITKAT)
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public static void setTranslucentStatus(@NonNull Window window, boolean translucent) {
         final int flags = window.getAttributes().flags;
         final int statusFlag = WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
@@ -163,7 +162,7 @@ public class SystemBarUtils {
     /**
      * 设置 半透明虚拟按键
      */
-    @RequiresApi(Build.VERSION_CODES.KITKAT)
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public static void setTranslucentNavigation(@NonNull Window window, boolean translucent) {
         final int flags = window.getAttributes().flags;
         final int navFlag = WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION;
@@ -184,7 +183,10 @@ public class SystemBarUtils {
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public static void setStatusBackgroundColor(@NonNull Window window, @ColorInt int color) {
         if (window.getStatusBarColor() != color) {
-            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            final int flag = WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
+            if ((window.getAttributes().flags & flag) == 0) {
+                window.addFlags(flag);
+            }
             window.setStatusBarColor(color);
         }
     }
@@ -201,7 +203,10 @@ public class SystemBarUtils {
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public static void setNavigationBackgroundColor(@NonNull Window window, @ColorInt int color) {
         if (window.getNavigationBarColor() != color) {
-            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            final int flag = WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
+            if ((window.getAttributes().flags & flag) == 0) {
+                window.addFlags(flag);
+            }
             window.setNavigationBarColor(color);
         }
     }
@@ -214,7 +219,7 @@ public class SystemBarUtils {
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public static void setTransparentStatus(@NonNull Window window) {
-        SystemBarUtils.setStatusBackgroundColor(window, Color.TRANSPARENT);
+        setStatusBackgroundColor(window, Color.TRANSPARENT);
 
         // 将contentView显示在状态栏底部
         View decor = window.getDecorView();
@@ -234,6 +239,11 @@ public class SystemBarUtils {
         View decorView = window.getDecorView();
         int flags = decorView.getSystemUiVisibility();
         if (light) {
+            // Make sure the required flag is added
+            final int flag = WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
+            if ((window.getAttributes().flags & flag) == 0) {
+                window.addFlags(flag);
+            }
             flags |= View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
         } else {
             flags &= ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
@@ -242,7 +252,7 @@ public class SystemBarUtils {
     }
 
     /**
-     * 改变小米手机的状态栏字体颜色, 要求MIUI 6 – MIUI 8
+     * 改变小米手机的状态栏字体颜色, 要求MIUI6 ~ MIUI8
      */
     public static void setLightStatusForMIUI(@NonNull Window window, boolean light) {
         try {

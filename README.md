@@ -136,7 +136,7 @@ app:contentFadeColor="@color/colorAccent"
 
 ## Pull Requests
 I will gladly accept pull requests for bug fixes and feature enhancements but please do them
-in the developers branch.
+in the `developers` branch.
 
 
 ## License

@@ -126,7 +126,7 @@ public class SlidingDrawerLayout extends ViewGroup {
     /** The minimum percentage of the widths of the drawers relative to current view's width. */
     public static final float MINIMUM_DRAWER_WIDTH_PERCENT = 0.1f;
     /** The maximum percentage of the widths of the drawers relative to current view's width. */
-    public static final float MAXIMUM_DRAWER_WIDTH_PERCENT = 0.9f;
+    public static final float MAXIMUM_DRAWER_WIDTH_PERCENT = 1.0f;
 
     private int mFlags;
 
@@ -246,7 +246,7 @@ public class SlidingDrawerLayout extends ViewGroup {
     /** Device independent pixel (dip/dp) */
     protected final float mDp;
     /** Distance to travel before drag may begin */
-    protected final float mTouchSlop;
+    protected final int mTouchSlop;
 
     /** Last known pointer id for touch events */
     private int mActivePointerId = ViewDragHelper.INVALID_POINTER;
@@ -339,7 +339,7 @@ public class SlidingDrawerLayout extends ViewGroup {
     @interface EdgeGravity {
     }
 
-    private class DrawerAnimator extends ValueAnimator {
+    private final class DrawerAnimator extends ValueAnimator {
         final AnimatorListener listener = new AnimatorListenerAdapter() {
             boolean canceled;
 
@@ -392,7 +392,7 @@ public class SlidingDrawerLayout extends ViewGroup {
         }
     }
 
-    private class DrawerRunnable implements Runnable {
+    private final class DrawerRunnable implements Runnable {
         private View drawer;
         private boolean open;
 
@@ -433,7 +433,7 @@ public class SlidingDrawerLayout extends ViewGroup {
         }
     }
 
-    private class OpenStubDrawerRunnable implements Runnable {
+    private final class OpenStubDrawerRunnable implements Runnable {
         final View drawer;
         final boolean animate;
 
@@ -464,8 +464,8 @@ public class SlidingDrawerLayout extends ViewGroup {
 
     public SlidingDrawerLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        mDp = context.getResources().getDisplayMetrics().density;
-        mTouchSlop = ViewConfiguration.getTouchSlop() * mDp;
+        mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
+        mDp = getResources().getDisplayMetrics().density;
         mMinimumFlingVelocity = 500f * mDp;
 
         ApplicationInfo ai = context.getApplicationInfo();
@@ -2624,6 +2624,7 @@ public class SlidingDrawerLayout extends ViewGroup {
             // Wait for the drawer on the specified side to be correctly resolved by this view
             // as it may depends on the current layout direction.
             post(new Runnable() {
+                @SuppressLint("WrongConstant")
                 @Override
                 public void run() {
                     openDrawer(ss.openDrawerGravity, false);

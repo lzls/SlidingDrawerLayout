@@ -19,12 +19,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.liuzhenlin.slidingdrawerlayout.SlidingDrawerLayout;
-import com.liuzhenlin.slidingdrawerlayout.sample.utils.OSHelper;
-import com.liuzhenlin.slidingdrawerlayout.sample.utils.SystemBarUtils;
-
-import java.lang.reflect.Field;
-
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
@@ -35,14 +29,20 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.ViewCompat;
 
+import com.liuzhenlin.slidingdrawerlayout.SlidingDrawerLayout;
+import com.liuzhenlin.slidingdrawerlayout.sample.utils.OSHelper;
+import com.liuzhenlin.slidingdrawerlayout.sample.utils.SystemBarUtils;
+
+import java.lang.reflect.Field;
+
 /**
  * @author 刘振林
  */
 public class MainActivity extends AppCompatActivity implements SlidingDrawerLayout.OnDrawerScrollListener {
     private DrawerArrowDrawable mHomeAsUpIndicator;
-    private Toolbar mToolbar;
+    /*synthetic*/ Toolbar mToolbar;
     @ColorInt
-    static int sColorPrimary = -1;
+    /*package*/ static int sColorPrimary = -1;
 
     private SlidingDrawerLayout mSlidingDrawerLayout;
     private ListView mListView;
@@ -85,6 +85,7 @@ public class MainActivity extends AppCompatActivity implements SlidingDrawerLayo
                     field.setAccessible(true);
                     View button = (View) field.get(mToolbar); // normally an ImageButton
 
+                    //noinspection ConstantConditions
                     mToolbar.setTitleMarginStart((int) (width_dif - button.getWidth() + 0.5f));
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -140,7 +141,6 @@ public class MainActivity extends AppCompatActivity implements SlidingDrawerLayo
                 if (convertView == null) {
                     convertView = View.inflate(parent.getContext(), R.layout.item_list, null);
                 }
-                convertView.setTag(position);
 
                 ((TextView) convertView).setText((String) getItem(position));
                 return convertView;
@@ -149,8 +149,8 @@ public class MainActivity extends AppCompatActivity implements SlidingDrawerLayo
         mListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                Toast.makeText(view.getContext(), "itemView " + position
-                        + " long clicked", Toast.LENGTH_SHORT).show();
+                Toast.makeText(view.getContext(),
+                        "itemView " + position + " long clicked", Toast.LENGTH_SHORT).show();
                 return true;
             }
         });
@@ -173,8 +173,9 @@ public class MainActivity extends AppCompatActivity implements SlidingDrawerLayo
                     mSlidingDrawerLayout.openDrawer(Gravity.START, true);
                 return true;
             case R.id.option_see_github:
-                startActivity(new Intent(Intent.ACTION_VIEW)
-                        .setData(Uri.parse("https://github.com/freeze-frames/SlidingDrawerLayout")));
+                startActivity(
+                        new Intent(Intent.ACTION_VIEW)
+                                .setData(Uri.parse("https://github.com/lzls/SlidingDrawerLayout")));
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

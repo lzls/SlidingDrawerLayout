@@ -17,6 +17,9 @@ import androidx.core.view.ViewCompat;
  * @author 刘振林
  */
 public class Utils {
+    private Utils() {
+    }
+
     public static int getAbsoluteHorizontalGravity(@NonNull View parent, int gravity) {
         return getAbsoluteGravity(parent, gravity) & Gravity.HORIZONTAL_GRAVITY_MASK;
     }

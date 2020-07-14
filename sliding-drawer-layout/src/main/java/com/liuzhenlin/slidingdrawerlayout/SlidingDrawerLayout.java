@@ -1,6 +1,6 @@
 /*
  * Created on 2018/05/16.
- * Copyright © 2018 刘振林. All rights reserved.
+ * Copyright © 2018–2020 刘振林. All rights reserved.
  */
 
 package com.liuzhenlin.slidingdrawerlayout;
@@ -77,7 +77,7 @@ public class SlidingDrawerLayout extends ViewGroup {
      * The drawer currently being shown, maybe one of {@link #mLeftDrawer}, {@link #mRightDrawer}
      * or <code>null</code>.
      */
-    private View mShownDrawer;
+    /*synthetic*/ View mShownDrawer;
 
     /**
      * Used to temporarily cache the drawer to be opened in the touch events.
@@ -128,7 +128,7 @@ public class SlidingDrawerLayout extends ViewGroup {
     /** The maximum percentage of the widths of the drawers relative to current view's width. */
     public static final float MAXIMUM_DRAWER_WIDTH_PERCENT = 1.0f;
 
-    private int mFlags;
+    /*synthetic*/ int mFlags;
 
     /** No drawer is currently scrolling. */
     public static final int SCROLL_STATE_IDLE = 0;
@@ -272,6 +272,7 @@ public class SlidingDrawerLayout extends ViewGroup {
      * While that drawer is scrolling, we simultaneously make the content scroll at a higher speed
      * than the drawer's.
      */
+    @SuppressWarnings("PointlessArithmeticExpression")
     private static final int SCROLL_RATIO_CONTENT_TO_DRAWER = 3 / 1;
 
     /** @see #getScrollPercent() */
@@ -295,7 +296,7 @@ public class SlidingDrawerLayout extends ViewGroup {
      * @see #getDuration()
      * @see #setDuration(int)
      */
-    private int mDuration;
+    /*synthetic*/ int mDuration;
 
     /**
      * Default duration of the animator used to open/close the drawers.
@@ -311,7 +312,7 @@ public class SlidingDrawerLayout extends ViewGroup {
      * @see ViewStub
      * @see OpenStubDrawerRunnable
      */
-    private OpenStubDrawerRunnable mOpenStubDrawerRunnable;
+    /*synthetic*/ OpenStubDrawerRunnable mOpenStubDrawerRunnable;
 
     /**
      * The Runnable to be executed for starting the drawer animator to normally open or close
@@ -336,7 +337,7 @@ public class SlidingDrawerLayout extends ViewGroup {
 
     @IntDef({Gravity.LEFT, Gravity.RIGHT, Gravity.START, Gravity.END})
     @Retention(RetentionPolicy.SOURCE)
-    @interface EdgeGravity {
+    /*package*/ @interface EdgeGravity {
     }
 
     private final class DrawerAnimator extends ValueAnimator {
@@ -393,10 +394,13 @@ public class SlidingDrawerLayout extends ViewGroup {
     }
 
     private final class DrawerRunnable implements Runnable {
-        private View drawer;
-        private boolean open;
+        View drawer;
+        boolean open;
 
         boolean isInMsgQueue;
+
+        DrawerRunnable() {
+        }
 
         void initForPost(View drawer, boolean open) {
             this.drawer = drawer;
@@ -533,8 +537,7 @@ public class SlidingDrawerLayout extends ViewGroup {
 //        setFocusableInTouchMode(true);
         setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);
 
-        ViewCompat.setImportantForAccessibility(this,
-                ViewCompat.IMPORTANT_FOR_ACCESSIBILITY_YES);
+        ViewCompat.setImportantForAccessibility(this, ViewCompat.IMPORTANT_FOR_ACCESSIBILITY_YES);
         ViewCompat.setAccessibilityDelegate(this, new AccessibilityDelegate());
         if (!CAN_HIDE_DESCENDANTS) {
             mChildAccessibilityDelegate = new ChildAccessibilityDelegate();
@@ -556,10 +559,10 @@ public class SlidingDrawerLayout extends ViewGroup {
 
     /**
      * @return the percentage of the width of the left drawer relative to current view's within
-     * the range from {@value MINIMUM_DRAWER_WIDTH_PERCENT} to {@value #MAXIMUM_DRAWER_WIDTH_PERCENT}
-     * or just {@link #UNSPECIFIED_DRAWER_WIDTH_PERCENT} if no specific percentage has been
-     * applied to measuring its width or {@link #UNRESOLVED_DRAWER_WIDTH_PERCENT} if this cannot
-     * be resolved before the layout direction resolved.
+     *         the range from {@value MINIMUM_DRAWER_WIDTH_PERCENT} to {@value #MAXIMUM_DRAWER_WIDTH_PERCENT}
+     *         or just {@link #UNSPECIFIED_DRAWER_WIDTH_PERCENT} if no specific percentage has been
+     *         applied to measuring its width or {@link #UNRESOLVED_DRAWER_WIDTH_PERCENT} if
+     *         this cannot be resolved before the layout direction resolved.
      */
     public float getLeftDrawerWidthPercent() {
         if ((mFlags & FLAG_DRAWER_WIDTH_PERCENTAGES_RESOLVED) == 0) {
@@ -601,10 +604,10 @@ public class SlidingDrawerLayout extends ViewGroup {
 
     /**
      * @return the percentage of the width of the right drawer relative to current view's within
-     * the range from {@value MINIMUM_DRAWER_WIDTH_PERCENT} to {@value #MAXIMUM_DRAWER_WIDTH_PERCENT}
-     * or just {@link #UNSPECIFIED_DRAWER_WIDTH_PERCENT} if no specific percentage has been
-     * applied to measuring its width or {@link #UNRESOLVED_DRAWER_WIDTH_PERCENT} if this cannot
-     * be resolved before the layout direction resolved.
+     *         the range from {@value MINIMUM_DRAWER_WIDTH_PERCENT} to {@value #MAXIMUM_DRAWER_WIDTH_PERCENT}
+     *         or just {@link #UNSPECIFIED_DRAWER_WIDTH_PERCENT} if no specific percentage has been
+     *         applied to measuring its width or {@link #UNRESOLVED_DRAWER_WIDTH_PERCENT} if
+     *         this cannot be resolved before the layout direction resolved.
      */
     public float getRightDrawerWidthPercent() {
         if ((mFlags & FLAG_DRAWER_WIDTH_PERCENTAGES_RESOLVED) == 0) {
@@ -646,9 +649,9 @@ public class SlidingDrawerLayout extends ViewGroup {
 
     /**
      * @return the width percentage of the start drawer depending on this view's resolved
-     * layout direction or just {@link #UNSPECIFIED_DRAWER_WIDTH_PERCENT} if no specific percentage
-     * has been applied to measuring its width or {@link #UNRESOLVED_DRAWER_WIDTH_PERCENT} if
-     * this cannot be resolved before the layout direction resolved.
+     *         layout direction or just {@link #UNSPECIFIED_DRAWER_WIDTH_PERCENT} if no specific
+     *         percentage has been applied to measuring its width or {@link #UNRESOLVED_DRAWER_WIDTH_PERCENT}
+     *         if this cannot be resolved before the layout direction resolved.
      */
     public float getStartDrawerWidthPercent() {
         final int layoutDirection = ViewCompat.getLayoutDirection(this);
@@ -686,9 +689,9 @@ public class SlidingDrawerLayout extends ViewGroup {
 
     /**
      * @return the width percentage of the end drawer depending on this view's resolved
-     * layout direction or just {@link #UNSPECIFIED_DRAWER_WIDTH_PERCENT} if no specific percentage
-     * has been applied to measuring its width or {@link #UNRESOLVED_DRAWER_WIDTH_PERCENT} if
-     * this cannot be resolved before the layout direction resolved.
+     *         layout direction or just {@link #UNSPECIFIED_DRAWER_WIDTH_PERCENT} if no specific
+     *         percentage has been applied to measuring its width or {@link #UNRESOLVED_DRAWER_WIDTH_PERCENT}
+     *         if this cannot be resolved before the layout direction resolved.
      */
     public float getEndDrawerWidthPercent() {
         final int layoutDirection = ViewCompat.getLayoutDirection(this);
@@ -797,7 +800,8 @@ public class SlidingDrawerLayout extends ViewGroup {
 
     /**
      * @return whether the drawer on the specified side is enabled in touch mode or the default
-     * <code>true</code> if its touch ability cannot be resolved before the layout direction resolved.
+     *         <code>true</code> if its touch ability cannot be resolved before the layout direction
+     *         resolved.
      * @see #isDrawerEnabledInTouch(View)
      */
     public boolean isDrawerEnabledInTouch(@EdgeGravity int gravity) {
@@ -934,9 +938,9 @@ public class SlidingDrawerLayout extends ViewGroup {
 
     /**
      * @return the current state of the dragged drawer's scrolling, maybe one of
-     * {@link #SCROLL_STATE_IDLE},
-     * {@link #SCROLL_STATE_TOUCH_SCROLL},
-     * {@link #SCROLL_STATE_AUTO_SCROLL}
+     *         {@link #SCROLL_STATE_IDLE},
+     *         {@link #SCROLL_STATE_TOUCH_SCROLL},
+     *         {@link #SCROLL_STATE_AUTO_SCROLL}
      */
     @SuppressLint("WrongConstant")
     @ScrollState
@@ -1002,8 +1006,8 @@ public class SlidingDrawerLayout extends ViewGroup {
 
     /**
      * @return the size of the touch-sensitive edges of the content view.
-     * This is the range in pixels along the edges of content view for which edge tracking is
-     * enabled to actively detect edge touches or drags.
+     *         This is the range in pixels along the edges of content view for which edge tracking
+     *         is enabled to actively detect edge touches or drags.
      */
     public int getContentSensitiveEdgeSize() {
         return mContentSensitiveEdgeSize;
@@ -1046,7 +1050,7 @@ public class SlidingDrawerLayout extends ViewGroup {
         }
     }
 
-    boolean resolveDrawerWidthPercentagesIfDirectionResolved(boolean preventLayout) {
+    private boolean resolveDrawerWidthPercentagesIfDirectionResolved(boolean preventLayout) {
         final boolean directionResolved = Utils.isLayoutDirectionResolved(this);
         if (directionResolved) {
             resolveDrawerWidthPercentages(ViewCompat.getLayoutDirection(this), preventLayout);
@@ -1054,7 +1058,7 @@ public class SlidingDrawerLayout extends ViewGroup {
         return directionResolved;
     }
 
-    void resolveDrawerWidthPercentages(int layoutDirection, boolean preventLayout) {
+    private void resolveDrawerWidthPercentages(int layoutDirection, boolean preventLayout) {
         if ((mFlags & FLAG_DRAWER_WIDTH_PERCENTAGES_RESOLVED) != 0) {
             return;
         }
@@ -1137,7 +1141,7 @@ public class SlidingDrawerLayout extends ViewGroup {
         }
     }
 
-    boolean resolveDrawerTouchAbilitiesIfDirectionResolved() {
+    private boolean resolveDrawerTouchAbilitiesIfDirectionResolved() {
         final boolean directionResolved = Utils.isLayoutDirectionResolved(this);
         if (directionResolved) {
             resolveDrawerTouchAbilities(ViewCompat.getLayoutDirection(this));
@@ -1145,7 +1149,7 @@ public class SlidingDrawerLayout extends ViewGroup {
         return directionResolved;
     }
 
-    void resolveDrawerTouchAbilities(int layoutDirection) {
+    private void resolveDrawerTouchAbilities(int layoutDirection) {
         if ((mFlags & FLAG_DRAWER_TOUCH_ABILITIES_RESOLVED) != 0) {
             return;
         }
@@ -1219,7 +1223,7 @@ public class SlidingDrawerLayout extends ViewGroup {
         mFlags |= FLAG_DRAWER_TOUCH_ABILITIES_RESOLVED;
     }
 
-    void traverseAllChildren() {
+    private void traverseAllChildren() {
         traverseAllChildren(getChildCount(), ViewCompat.getLayoutDirection(this));
     }
 
@@ -1358,8 +1362,7 @@ public class SlidingDrawerLayout extends ViewGroup {
             // Update children's accessibility importances in case they are changed. This happens,
             // for example, a new drawer is added or an existing one is removed or some child is
             // replaced with another view.
-            updateChildrenImportantForAccessibility(
-                    (mFlags & FLAG_DRAWER_HAS_BEEN_OPENED) != 0);
+            updateChildrenImportantForAccessibility((mFlags & FLAG_DRAWER_HAS_BEEN_OPENED) != 0);
         }
     }
 
@@ -1433,7 +1436,8 @@ public class SlidingDrawerLayout extends ViewGroup {
             }
         }
 
-        setMeasuredDimension(resolveSizeAndState(maxWidth, widthMeasureSpec, childrenState),
+        setMeasuredDimension(
+                resolveSizeAndState(maxWidth, widthMeasureSpec, childrenState),
                 resolveSizeAndState(maxHeight, heightMeasureSpec,
                         childrenState << MEASURED_HEIGHT_STATE_SHIFT));
     }
@@ -1448,8 +1452,8 @@ public class SlidingDrawerLayout extends ViewGroup {
 
     @Override
     protected void measureChildWithMargins(View child, int parentWidthMeasureSpec,
-                                           int widthUsed,
-                                           int parentHeightMeasureSpec, int heightUsed) {
+                                           int widthUsed, int parentHeightMeasureSpec,
+                                           int heightUsed) {
         // Child does not have any margin
         final int horizontalPaddings = getPaddingLeft() + getPaddingRight() + widthUsed;
         final int verticalPaddings = getPaddingTop() + getPaddingBottom() + heightUsed;
@@ -2269,7 +2273,7 @@ public class SlidingDrawerLayout extends ViewGroup {
      * @param drawer the drawer to scroll
      * @param x      the position on the X axis for the drawer to scroll to
      */
-    private void scrollDrawerTo(View drawer, int x) {
+    /*synthetic*/ void scrollDrawerTo(View drawer, int x) {
         scrollDrawerBy(drawer, x - drawer.getLeft());
     }
 
@@ -2359,13 +2363,13 @@ public class SlidingDrawerLayout extends ViewGroup {
          * The initial position of the left of the View to which these layout parameters belong,
          * as computed in this View's {@link #onLayout(boolean, int, int, int, int)} method.
          */
-        private int startLeft;
+        /*synthetic*/ int startLeft;
 
         /**
          * To a drawer: The position for its left to reach when it is completely opened.
          * To content View: The position for its left to reach when some drawer is completely opened.
          */
-        private int finalLeft;
+        /*synthetic*/ int finalLeft;
 
         public LayoutParams(@NonNull Context c, @Nullable AttributeSet attrs) {
             super(c, attrs);
@@ -2412,7 +2416,7 @@ public class SlidingDrawerLayout extends ViewGroup {
 
     private List<OnDrawerScrollListener> mOnDrawerScrollListeners;
 
-    static final OnDrawerScrollListener[] sEmptyOnDrawerScrollListenerArray = {};
+    private static final OnDrawerScrollListener[] sEmptyOnDrawerScrollListenerArray = {};
 
     public void addOnDrawerScrollListener(@NonNull OnDrawerScrollListener listener) {
         if (mOnDrawerScrollListeners == null) {
@@ -2429,10 +2433,10 @@ public class SlidingDrawerLayout extends ViewGroup {
             mOnDrawerScrollListeners.remove(listener);
     }
 
-    public void clearOnDrawerScrollListeners() {
-        if (mOnDrawerScrollListeners != null)
-            mOnDrawerScrollListeners.clear();
-    }
+//    public void clearOnDrawerScrollListeners() {
+//        if (mOnDrawerScrollListeners != null)
+//            mOnDrawerScrollListeners.clear();
+//    }
 
     private void dispatchDrawerScrollPercentChangeIfNeeded(float percent) {
         if (percent == mScrollPercent) return;
@@ -2452,7 +2456,8 @@ public class SlidingDrawerLayout extends ViewGroup {
         }
     }
 
-    private void dispatchDrawerScrollStateChangeIfNeeded(@ScrollState int state) {
+    @SuppressLint("ObsoleteSdkInt")
+    /*synthetic*/ void dispatchDrawerScrollStateChangeIfNeeded(@ScrollState int state) {
         final int old = mFlags & SCROLL_STATE_MASK;
         if (state == old) return;
         mFlags = (mFlags & ~SCROLL_STATE_MASK) | state;
@@ -2698,7 +2703,7 @@ public class SlidingDrawerLayout extends ViewGroup {
     // --------------- Accessibility ------------------------
 
     /** Whether we can use NO_HIDE_DESCENDANTS accessibility importance. */
-    static final boolean CAN_HIDE_DESCENDANTS =
+    /*synthetic*/ static final boolean CAN_HIDE_DESCENDANTS =
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
 
     private ChildAccessibilityDelegate mChildAccessibilityDelegate;
@@ -2779,7 +2784,7 @@ public class SlidingDrawerLayout extends ViewGroup {
         return SlidingDrawerLayout.class.getName();
     }
 
-    void updateChildrenImportantForAccessibility(boolean isDrawerOpen) {
+    private void updateChildrenImportantForAccessibility(boolean isDrawerOpen) {
         if (mContentView == null /* No child is added to this layout */) {
             return;
         }
@@ -2810,8 +2815,11 @@ public class SlidingDrawerLayout extends ViewGroup {
         }
     }
 
-    class AccessibilityDelegate extends AccessibilityDelegateCompat {
-        private final Rect mTmpRect = new Rect();
+    private final class AccessibilityDelegate extends AccessibilityDelegateCompat {
+        private final Rect tmpRect = new Rect();
+
+        AccessibilityDelegate() {
+        }
 
         @Override
         public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfoCompat info) {
@@ -2887,11 +2895,11 @@ public class SlidingDrawerLayout extends ViewGroup {
          */
         private void copyNodeInfoNoChildren(AccessibilityNodeInfoCompat dest,
                                             AccessibilityNodeInfoCompat src) {
-            src.getBoundsInParent(mTmpRect);
-            dest.setBoundsInParent(mTmpRect);
+            src.getBoundsInParent(tmpRect);
+            dest.setBoundsInParent(tmpRect);
 
-            src.getBoundsInScreen(mTmpRect);
-            dest.setBoundsInScreen(mTmpRect);
+            src.getBoundsInScreen(tmpRect);
+            dest.setBoundsInScreen(tmpRect);
 
             dest.setVisibleToUser(src.isVisibleToUser());
             dest.setPackageName(src.getPackageName());
@@ -2925,13 +2933,16 @@ public class SlidingDrawerLayout extends ViewGroup {
      * platforms prior to KITKAT but we want to hide the entire content and the unopened drawer
      * (if any) if a drawer is open.
      */
-    static boolean includeChildForAccessibility(View child) {
+    /*synthetic*/ static boolean includeChildForAccessibility(View child) {
         final int ifa = ViewCompat.getImportantForAccessibility(child);
         return ifa != ViewCompat.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
                 && ifa != ViewCompat.IMPORTANT_FOR_ACCESSIBILITY_NO;
     }
 
-    static final class ChildAccessibilityDelegate extends AccessibilityDelegateCompat {
+    private static final class ChildAccessibilityDelegate extends AccessibilityDelegateCompat {
+        ChildAccessibilityDelegate() {
+        }
+
         @Override
         public void onInitializeAccessibilityNodeInfo(View child,
                                                       AccessibilityNodeInfoCompat info) {

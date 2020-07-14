@@ -1,5 +1,5 @@
 /*
- * Created on 18-9-29 下午9:26.
+ * Created on 2018/9/29 9:26 PM.
  * Copyright © 2018 刘振林. All rights reserved.
  */
 
@@ -18,21 +18,6 @@ public class SystemProperties {
     private SystemProperties() {
     }
 
-    public static long getLong(String key, long def) {
-        try {
-            Class<?> clz = Class.forName("android.os.SystemProperties");
-            Method getLong = clz.getMethod("getLong", String.class, long.class);
-            return (long) getLong.invoke(clz, key, def);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return def;
-    }
-
-    public static long getLong(String key) {
-        return getLong(key, 0L);
-    }
-
     public static String getString(String key, String def) {
         try {
             Class<?> clz = Class.forName("android.os.SystemProperties");
@@ -46,6 +31,21 @@ public class SystemProperties {
 
     public static String getString(String key) {
         return getString(key, "");
+    }
+
+    public static long getLong(String key, long def) {
+        try {
+            Class<?> clz = Class.forName("android.os.SystemProperties");
+            Method getLong = clz.getMethod("getLong", String.class, long.class);
+            return (long) getLong.invoke(clz, key, def);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return def;
+    }
+
+    public static long getLong(String key) {
+        return getLong(key, 0L);
     }
 
     public static int getInt(String key, int def) {

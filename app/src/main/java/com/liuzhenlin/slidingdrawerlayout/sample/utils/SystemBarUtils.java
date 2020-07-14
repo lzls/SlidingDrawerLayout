@@ -55,7 +55,7 @@ public class SystemBarUtils {
     /**
      * 判断是否有虚拟按键
      */
-    @SuppressLint({"ObsoleteSdkInt", "PrivateApi"})
+    @SuppressLint("ObsoleteSdkInt")
     public static boolean hasNavigationBar(@NonNull Context context) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
             return false;
@@ -69,6 +69,7 @@ public class SystemBarUtils {
         }
         if (hasNavBar) {
             try {
+                @SuppressLint("PrivateApi")
                 Class<?> systemPropertiesClass = Class.forName("android.os.SystemProperties");
                 Method get = systemPropertiesClass.getMethod("get", String.class);
                 String navBarOverride = (String) get.invoke(
@@ -86,6 +87,7 @@ public class SystemBarUtils {
 
     /**
      * 设置显示或隐藏状态栏和虚拟按键
+     * <p>
      * {@link View#SYSTEM_UI_FLAG_LAYOUT_STABLE}：使View的布局不变，隐藏状态栏或导航栏后，View不会被拉伸。
      * {@link View#SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN}：让decorView全屏显示，
      * 但状态栏不会被隐藏覆盖，状态栏依然可见，decorView顶端布局部分会被状态遮住。
@@ -98,15 +100,13 @@ public class SystemBarUtils {
             int flags = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                     | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                     | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                    // The above 3 flags make the content appear
-                    // under the system bars so that the content doesn't resize
-                    // when the system bars hide and show.
+                    // The above 3 flags make the content appear under the system bars
+                    // so that the content doesn't resize when the system bars hide and show.
                     | View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
                     | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide navigation bar
                     | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
-            // The IMMERSIVE_STICKY flag to prevent the flags of
-            // hiding navigation bar and hiding status bar from being force-cleared
-            // by the system on any user interaction.
+            // The IMMERSIVE_STICKY flag to prevent the flags of hiding navigation bar and
+            // hiding status bar from being force-cleared by the system on any user interaction.
             if (show) {
                 // This snippet shows the system bars.
                 // It does this by removing all the flags.
@@ -130,7 +130,7 @@ public class SystemBarUtils {
                 }
             }
 
-            // FIXME: To hide navigation Permanently.
+            // FIXME: to hide navigation Permanently.
             final int visibility = decorView.getSystemUiVisibility();
             final int hideNavFlag = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
             if (show) {
@@ -144,7 +144,7 @@ public class SystemBarUtils {
     /**
      * 设置 半透明状态栏
      */
-    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    @RequiresApi(Build.VERSION_CODES.KITKAT)
     public static void setTranslucentStatus(@NonNull Window window, boolean translucent) {
         final int flags = window.getAttributes().flags;
         final int statusFlag = WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
@@ -162,7 +162,7 @@ public class SystemBarUtils {
     /**
      * 设置 半透明虚拟按键
      */
-    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    @RequiresApi(Build.VERSION_CODES.KITKAT)
     public static void setTranslucentNavigation(@NonNull Window window, boolean translucent) {
         final int flags = window.getAttributes().flags;
         final int navFlag = WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION;
@@ -180,7 +180,7 @@ public class SystemBarUtils {
     /**
      * 设置状态栏的颜色
      */
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     public static void setStatusBackgroundColor(@NonNull Window window, @ColorInt int color) {
         if (window.getStatusBarColor() != color) {
             final int flag = WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
@@ -191,7 +191,7 @@ public class SystemBarUtils {
         }
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     public static void setStatusBackgroundColorRes(@NonNull Window window, @ColorRes int colorId) {
         Context context = window.getContext();
         setStatusBackgroundColor(window, ContextCompat.getColor(context, colorId));
@@ -200,7 +200,7 @@ public class SystemBarUtils {
     /**
      * 设置导航栏的颜色
      */
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     public static void setNavigationBackgroundColor(@NonNull Window window, @ColorInt int color) {
         if (window.getNavigationBarColor() != color) {
             final int flag = WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
@@ -211,17 +211,20 @@ public class SystemBarUtils {
         }
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     public static void setNavigationBackgroundColorRes(@NonNull Window window, @ColorRes int colorId) {
         Context context = window.getContext();
         setNavigationBackgroundColor(window, ContextCompat.getColor(context, colorId));
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    /**
+     * 设置透明状态栏
+     */
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     public static void setTransparentStatus(@NonNull Window window) {
         setStatusBackgroundColor(window, Color.TRANSPARENT);
 
-        // 将contentView显示在状态栏底部
+        // Place the decorView under the status bar
         View decor = window.getDecorView();
         int visibility = decor.getSystemUiVisibility();
         visibility |= View.SYSTEM_UI_FLAG_LAYOUT_STABLE
@@ -234,7 +237,7 @@ public class SystemBarUtils {
      *
      * @see <a href="https://developer.android.com/reference/android/R.attr.html#windowLightStatusBar"></a>
      */
-    @RequiresApi(api = Build.VERSION_CODES.M)
+    @RequiresApi(Build.VERSION_CODES.M)
     public static void setLightStatus(@NonNull Window window, boolean light) {
         View decorView = window.getDecorView();
         int flags = decorView.getSystemUiVisibility();

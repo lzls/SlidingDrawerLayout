@@ -20,6 +20,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -475,23 +476,23 @@ public class SlidingDrawerLayout extends ViewGroup {
         TypedArray ta = context.obtainStyledAttributes(attrs,
                 R.styleable.SlidingDrawerLayout, defStyleAttr, 0);
         if (ta.hasValue(R.styleable.SlidingDrawerLayout_widthPercent_leftDrawer)) {
-            mLeftDrawerWidthPercent = ta.getFloat(R.styleable
-                    .SlidingDrawerLayout_widthPercent_leftDrawer, UNSPECIFIED_DRAWER_WIDTH_PERCENT);
+            mLeftDrawerWidthPercent = getDrawerWidthPercentFromAttr(ta,
+                    R.styleable.SlidingDrawerLayout_widthPercent_leftDrawer);
             checkDrawerWidthPercent(mLeftDrawerWidthPercent);
         }
         if (ta.hasValue(R.styleable.SlidingDrawerLayout_widthPercent_rightDrawer)) {
-            mRightDrawerWidthPercent = ta.getFloat(R.styleable.
-                    SlidingDrawerLayout_widthPercent_rightDrawer, UNSPECIFIED_DRAWER_WIDTH_PERCENT);
+            mRightDrawerWidthPercent = getDrawerWidthPercentFromAttr(ta,
+                    R.styleable.SlidingDrawerLayout_widthPercent_rightDrawer);
             checkDrawerWidthPercent(mRightDrawerWidthPercent);
         }
         if (ta.hasValue(R.styleable.SlidingDrawerLayout_widthPercent_startDrawer)) {
-            mStartDrawerWidthPercent = ta.getFloat(R.styleable
-                    .SlidingDrawerLayout_widthPercent_startDrawer, UNSPECIFIED_DRAWER_WIDTH_PERCENT);
+            mStartDrawerWidthPercent = getDrawerWidthPercentFromAttr(ta,
+                    R.styleable.SlidingDrawerLayout_widthPercent_startDrawer);
             checkDrawerWidthPercent(mStartDrawerWidthPercent);
         }
         if (ta.hasValue(R.styleable.SlidingDrawerLayout_widthPercent_endDrawer)) {
-            mEndDrawerWidthPercent = ta.getFloat(R.styleable
-                    .SlidingDrawerLayout_widthPercent_endDrawer, UNSPECIFIED_DRAWER_WIDTH_PERCENT);
+            mEndDrawerWidthPercent = getDrawerWidthPercentFromAttr(ta,
+                    R.styleable.SlidingDrawerLayout_widthPercent_endDrawer);
             checkDrawerWidthPercent(mEndDrawerWidthPercent);
         }
         if (ta.hasValue(R.styleable.SlidingDrawerLayout_enabledInTouch_leftDrawer)) {
@@ -539,6 +540,25 @@ public class SlidingDrawerLayout extends ViewGroup {
 
         // Disable the splitting of MotionEvents to multiple children during touch event dispatch.
         setMotionEventSplittingEnabled(false);
+    }
+
+    private float getDrawerWidthPercentFromAttr(TypedArray attrs, int attrIndex) {
+        final int attrType;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            attrType = attrs.getType(attrIndex);
+        } else {
+            TypedValue value = new TypedValue();
+            if (attrs.getValue(attrIndex, value)) {
+                attrType = value.type;
+            } else {
+                attrType = TypedValue.TYPE_NULL;
+            }
+        }
+        if (attrType == TypedValue.TYPE_FRACTION) {
+            return attrs.getFraction(attrIndex, 1, 1, UNSPECIFIED_DRAWER_WIDTH_PERCENT);
+        } else {
+            return attrs.getFloat(attrIndex, UNSPECIFIED_DRAWER_WIDTH_PERCENT);
+        }
     }
 
     private void checkDrawerWidthPercent(float percent) {

@@ -208,29 +208,23 @@ public class SlidingDrawerLayout extends ViewGroup {
      */
     private static final int FLAG_SUPPORTS_RTL = 1 << 19;
 
-    /** Indicates that the left drawer is in this layout and needs to be laid out. */
-    private static final int FLAG_LEFT_DRAWER_IN_LAYOUT = 1 << 20;
-
-    /** Indicates that the right drawer is in this layout and needs to be laid out. */
-    private static final int FLAG_RIGHT_DRAWER_IN_LAYOUT = 1 << 21;
-
     /**
      * Flag indicating whether the user's finger downs on the area of content view when this view
      * with a drawer open receives {@link MotionEvent#ACTION_DOWN}.
      */
-    private static final int FLAG_FINGER_DOWNS_ON_CONTENT_WHEN_DRAWER_IS_OPEN = 1 << 22;
+    private static final int FLAG_FINGER_DOWNS_ON_CONTENT_WHEN_DRAWER_IS_OPEN = 1 << 20;
 
     /** When set, this ViewGroup should not intercept touch events. */
-    private static final int FLAG_DISALLOW_INTERCEPT_TOUCH_EVENT = 1 << 23;
+    private static final int FLAG_DISALLOW_INTERCEPT_TOUCH_EVENT = 1 << 21;
 
     /** When true, indicates that the touch events are intercepted by this ViewGroup */
-    private static final int FLAG_TOUCH_INTERCEPTED = 1 << 24;
+    private static final int FLAG_TOUCH_INTERCEPTED = 1 << 22;
 
 //    /**
 //     * Flag indicating whether we should close the drawer currently open when user presses
 //     * the back button. By default, this is <code>true</code>.
 //     */
-//    private static final int FLAG_CLOSE_OPEN_DRAWER_ON_BACK_PRESSED_ENABLED = 1 << 25;
+//    private static final int FLAG_CLOSE_OPEN_DRAWER_ON_BACK_PRESSED_ENABLED = 1 << 23;
 
     /**
      * @see #getContentSensitiveEdgeSize()
@@ -596,7 +590,7 @@ public class SlidingDrawerLayout extends ViewGroup {
         if (mLeftDrawerWidthPercent != percent) {
             mLeftDrawerWidthPercent = percent;
 
-            if (mLeftDrawer != null) {
+            if (isChildInLayout(mLeftDrawer)) {
                 requestLayout();
             }
         }
@@ -641,7 +635,7 @@ public class SlidingDrawerLayout extends ViewGroup {
         if (mRightDrawerWidthPercent != percent) {
             mRightDrawerWidthPercent = percent;
 
-            if (mRightDrawer != null) {
+            if (isChildInLayout(mRightDrawer)) {
                 requestLayout();
             }
         }
@@ -900,18 +894,18 @@ public class SlidingDrawerLayout extends ViewGroup {
     public boolean isDrawerSlidable(@EdgeGravity int gravity) {
         switch (gravity) {
             case Gravity.LEFT:
-                if (mLeftDrawer instanceof ViewStub) {
+                if (isStubDrawer(mLeftDrawer)) {
                     return (mFlags & FLAG_LEFT_DRAWER_ENABLED_IN_TOUCH) != 0;
                 }
                 return (mFlags & FLAG_LEFT_DRAWER_ENABLED_IN_TOUCH) != 0
-                        && (mFlags & FLAG_LEFT_DRAWER_IN_LAYOUT) != 0;
+                        && isChildInLayout(mLeftDrawer);
 
             case Gravity.RIGHT:
-                if (mRightDrawer instanceof ViewStub) {
+                if (isStubDrawer(mRightDrawer)) {
                     return (mFlags & FLAG_RIGHT_DRAWER_ENABLED_IN_TOUCH) != 0;
                 }
                 return (mFlags & FLAG_RIGHT_DRAWER_ENABLED_IN_TOUCH) != 0
-                        && (mFlags & FLAG_RIGHT_DRAWER_IN_LAYOUT) != 0;
+                        && isChildInLayout(mRightDrawer);
 
             case Gravity.START:
             case Gravity.END:
@@ -1128,14 +1122,8 @@ public class SlidingDrawerLayout extends ViewGroup {
         mFlags |= FLAG_DRAWER_WIDTH_PERCENTAGES_RESOLVED;
 
         if (!preventLayout) {
-            boolean layoutRequestNeeded = false;
-            if (mLeftDrawerWidthPercent != ldwp && mLeftDrawer != null) {
-                layoutRequestNeeded = true;
-            }
-            if (mRightDrawerWidthPercent != rdwp && mRightDrawer != null) {
-                layoutRequestNeeded = true;
-            }
-            if (layoutRequestNeeded) {
+            if (mLeftDrawerWidthPercent != ldwp && isChildInLayout(mLeftDrawer)
+                    || mRightDrawerWidthPercent != rdwp && isChildInLayout(mRightDrawer)) {
                 requestLayout();
             }
         }
@@ -1233,7 +1221,6 @@ public class SlidingDrawerLayout extends ViewGroup {
         }
 
         mContentView = mLeftDrawer = mRightDrawer = null;
-        mFlags &= ~(FLAG_LEFT_DRAWER_IN_LAYOUT | FLAG_RIGHT_DRAWER_IN_LAYOUT);
         switch (childCount) {
             case 1:
                 mContentView = getChildAt(0);
@@ -1258,14 +1245,8 @@ public class SlidingDrawerLayout extends ViewGroup {
 
                 View drawer;
                 if (mLeftDrawer != null) {
-                    if (mLeftDrawer.getVisibility() != GONE) {
-                        mFlags |= FLAG_LEFT_DRAWER_IN_LAYOUT;
-                    }
                     drawer = mLeftDrawer;
                 } else /*if (mRightDrawer != null)*/ {
-                    if (mRightDrawer.getVisibility() != GONE) {
-                        mFlags |= FLAG_RIGHT_DRAWER_IN_LAYOUT;
-                    }
                     drawer = mRightDrawer;
                 }
                 if (getChildAt(0) != drawer) {
@@ -1283,16 +1264,9 @@ public class SlidingDrawerLayout extends ViewGroup {
                             "to finalize the placements of the drawers.");
                 }
 
-                if (mLeftDrawer.getVisibility() != GONE) {
-                    mFlags |= FLAG_LEFT_DRAWER_IN_LAYOUT;
-                }
                 if (getChildAt(0) != mLeftDrawer) {
                     detachViewFromParent(mLeftDrawer);
                     attachViewToParent(mLeftDrawer, 0, mLeftDrawer.getLayoutParams());
-                }
-
-                if (mRightDrawer.getVisibility() != GONE) {
-                    mFlags |= FLAG_RIGHT_DRAWER_IN_LAYOUT;
                 }
                 if (getChildAt(1) != mRightDrawer) {
                     detachViewFromParent(mRightDrawer);
@@ -1398,6 +1372,10 @@ public class SlidingDrawerLayout extends ViewGroup {
         resolveDrawerWidthPercentages(layoutDirection, true);
     }
 
+    private boolean isChildInLayout(View child) {
+        return child != null && child.getVisibility() != GONE;
+    }
+
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         final int childCount = getChildCount();
@@ -1411,7 +1389,7 @@ public class SlidingDrawerLayout extends ViewGroup {
 
         for (int i = 0; i < childCount; i++) {
             View child = getChildAt(i);
-            if (child.getVisibility() != GONE) {
+            if (isChildInLayout(child)) {
                 measureChild(child, widthMeasureSpec, heightMeasureSpec);
                 maxWidth = Math.max(maxWidth, child.getMeasuredWidth());
                 maxHeight = Math.max(maxHeight, child.getMeasuredHeight());
@@ -1524,7 +1502,7 @@ public class SlidingDrawerLayout extends ViewGroup {
 
         for (int i = 0, childCount = getChildCount(); i < childCount; i++) {
             View child = getChildAt(i);
-            if (child.getVisibility() == GONE) {
+            if (!isChildInLayout(child)) {
                 continue;
             }
 
@@ -1952,7 +1930,7 @@ public class SlidingDrawerLayout extends ViewGroup {
                 handle = true;
             }
             if (handle) {
-                if (mLeftDrawer instanceof ViewStub) {
+                if (isStubDrawer(mLeftDrawer)) {
                     mLeftDrawer = inflateStubDrawer((ViewStub) mLeftDrawer);
                 }
                 mTmpDrawer = mLeftDrawer;
@@ -1973,7 +1951,7 @@ public class SlidingDrawerLayout extends ViewGroup {
                 handle = true;
             }
             if (handle) {
-                if (mRightDrawer instanceof ViewStub) {
+                if (isStubDrawer(mRightDrawer)) {
                     mRightDrawer = inflateStubDrawer((ViewStub) mRightDrawer);
                 }
                 mTmpDrawer = mRightDrawer;
@@ -2094,6 +2072,10 @@ public class SlidingDrawerLayout extends ViewGroup {
 //        return super.onKeyUp(keyCode, event);
 //    }
 
+    private boolean isStubDrawer(View drawer) {
+        return drawer instanceof ViewStub;
+    }
+
     private View inflateStubDrawer(ViewStub stub) {
         final int layoutResource = stub.getLayoutResource();
         if (layoutResource != 0) {
@@ -2154,7 +2136,7 @@ public class SlidingDrawerLayout extends ViewGroup {
 
         if (mShownDrawer == null) {
             if (drawer == mLeftDrawer || drawer == mRightDrawer) {
-                if (drawer instanceof ViewStub) {
+                if (isStubDrawer(drawer)) {
                     drawer = inflateStubDrawer((ViewStub) drawer);
 
                     if (mOpenStubDrawerRunnable != null) {
@@ -2193,8 +2175,8 @@ public class SlidingDrawerLayout extends ViewGroup {
     }
 
     private void openDrawerInternal(View drawer, boolean animate) {
-        if (drawer == mLeftDrawer && (mFlags & FLAG_LEFT_DRAWER_IN_LAYOUT) != 0
-                || drawer == mRightDrawer && (mFlags & FLAG_RIGHT_DRAWER_IN_LAYOUT) != 0) {
+        if (drawer == mLeftDrawer && isChildInLayout(mLeftDrawer)
+                || drawer == mRightDrawer && isChildInLayout(mRightDrawer)) {
             LayoutParams lp = (LayoutParams) drawer.getLayoutParams();
             if (animate) {
                 if (smoothScrollDrawerTo(drawer, lp.finalLeft)) {
@@ -2895,7 +2877,9 @@ public class SlidingDrawerLayout extends ViewGroup {
          */
         private void copyNodeInfoNoChildren(AccessibilityNodeInfoCompat dest,
                                             AccessibilityNodeInfoCompat src) {
+            //noinspection deprecation
             src.getBoundsInParent(tmpRect);
+            //noinspection deprecation
             dest.setBoundsInParent(tmpRect);
 
             src.getBoundsInScreen(tmpRect);

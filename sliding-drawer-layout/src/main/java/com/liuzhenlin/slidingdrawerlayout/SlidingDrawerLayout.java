@@ -2409,6 +2409,7 @@ public class SlidingDrawerLayout extends ViewGroup {
          *
          * @param source The layout params to copy from
          */
+        @SuppressWarnings("CopyConstructorMissesField")
         public LayoutParams(@NonNull LayoutParams source) {
             super(source);
             this.gravity = source.gravity;

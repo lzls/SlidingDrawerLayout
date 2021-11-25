@@ -369,19 +369,15 @@ public class SlidingDrawerLayout extends ViewGroup {
             setInterpolator(sBezierCurveDecelerationInterpolator);
             setDuration(mDuration);
             addListener(listener);
-            addUpdateListener(new AnimatorUpdateListener() {
-                @Override
-                public void onAnimationUpdate(ValueAnimator animation) {
-                    scrollDrawerTo(mShownDrawer, (int) animation.getAnimatedValue());
-                }
-            });
+            addUpdateListener(
+                    animation -> scrollDrawerTo(mShownDrawer, (int) animation.getAnimatedValue()));
         }
 
         void cancel(boolean clearFlag) {
             if (clearFlag) {
                 super.cancel();
             } else {
-                final int flag = mFlags & (FLAG_ANIMATING_DRAWER_OPENING | FLAG_ANIMATING_DRAWER_CLOSURE);
+                int flag = mFlags & (FLAG_ANIMATING_DRAWER_OPENING | FLAG_ANIMATING_DRAWER_CLOSURE);
                 super.cancel();
                 mFlags |= flag;
             }
@@ -2628,6 +2624,7 @@ public class SlidingDrawerLayout extends ViewGroup {
 
     // --------------- Saved Instance State ------------------------
 
+    @SuppressLint("WrongConstant")
     @Override
     protected void onRestoreInstanceState(Parcelable state) {
         if (!(state instanceof SavedState)) {
@@ -2641,13 +2638,7 @@ public class SlidingDrawerLayout extends ViewGroup {
         if (ss.openDrawerGravity != Gravity.NO_GRAVITY) {
             // Wait for the drawer on the specified side to be correctly resolved by this view
             // as it may depends on the current layout direction.
-            post(new Runnable() {
-                @SuppressLint("WrongConstant")
-                @Override
-                public void run() {
-                    openDrawer(ss.openDrawerGravity, false);
-                }
-            });
+            post(() -> openDrawer(ss.openDrawerGravity, false));
         }
     }
 

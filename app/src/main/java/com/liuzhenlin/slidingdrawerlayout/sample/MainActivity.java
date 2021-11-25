@@ -13,7 +13,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -75,21 +74,18 @@ public class MainActivity extends AppCompatActivity implements SlidingDrawerLayo
 //        });
 
         mToolbar = findViewById(R.id.toolbar);
-        mToolbar.post(new Runnable() {
-            @Override
-            public void run() {
-                // This is a bit of a hack. Due to obsessive-compulsive disorder,
-                // insert proper margin before the action bar's title.
-                try {
-                    Field field = mToolbar.getClass().getDeclaredField("mNavButtonView");
-                    field.setAccessible(true);
-                    View button = (View) field.get(mToolbar); // normally an ImageButton
+        mToolbar.post(() -> {
+            // This is a bit of a hack. Due to obsessive-compulsive disorder,
+            // insert proper margin before the action bar's title.
+            try {
+                Field field = mToolbar.getClass().getDeclaredField("mNavButtonView");
+                field.setAccessible(true);
+                View button = (View) field.get(mToolbar); // normally an ImageButton
 
-                    //noinspection ConstantConditions
-                    mToolbar.setTitleMarginStart((int) (width_dif - button.getWidth() + 0.5f));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                //noinspection ConstantConditions
+                mToolbar.setTitleMarginStart((int) (width_dif - button.getWidth() + 0.5f));
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         });
 
@@ -146,13 +142,10 @@ public class MainActivity extends AppCompatActivity implements SlidingDrawerLayo
                 return convertView;
             }
         });
-        mListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                Toast.makeText(view.getContext(),
-                        "itemView " + position + " long clicked", Toast.LENGTH_SHORT).show();
-                return true;
-            }
+        mListView.setOnItemLongClickListener((parent, view, position, id) -> {
+            Toast.makeText(view.getContext(),
+                    "itemView " + position + " long clicked", Toast.LENGTH_SHORT).show();
+            return true;
         });
     }
 

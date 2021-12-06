@@ -7,6 +7,13 @@ A layout derived from ViewGroup, not any other indirect container, such as Frame
 </div>
 
 
+## Documentation
+
+* The [release notes][] document the major changes in each release.
+
+[release notes]: https://github.com/lzls/SlidingDrawerLayout/blob/master/RELEASE_NOTES.md
+
+
 ## Layout File Sample:
 ```xml
 <com.liuzhenlin.slidingdrawerlayout.SlidingDrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"

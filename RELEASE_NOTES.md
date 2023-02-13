@@ -1,5 +1,12 @@
 # Release Notes
 
+### 2.0.2 (2023-02-13)
+* Library
+    * Fix drawer in a stopped Activity would not stay open when the Activity recreated.
+    * Fix bug where custom RTL properties are ignored when RTL is not supported and the left
+      and right ones are defined.
+    * Optimize child measurement logic of SlidingDrawerLayout.
+
 ### 2.0.1 (2021-11-25)
 * Library
     * Fix inaccuracy of the `Utils#isLayoutDirectionResolved` method on SDKs 17 & 18.
